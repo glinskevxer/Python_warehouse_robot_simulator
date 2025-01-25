@@ -7,5 +7,6 @@ represent exactly.
 """
 
 from spikemaul.units.milepost import FEET_PER_MILE, Milepost
+from spikemaul.units.span import Span, merge_all, subtract_all, total_miles
 
-__all__ = ["FEET_PER_MILE", "Milepost"]
+__all__ = ["FEET_PER_MILE", "Milepost", "Span", "merge_all", "subtract_all", "total_miles"]
