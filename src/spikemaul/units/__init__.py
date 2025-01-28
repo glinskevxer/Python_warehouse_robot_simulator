@@ -9,6 +9,7 @@ represent exactly.
 from spikemaul.units.chainage import Chainage, Equation, Stretch
 from spikemaul.units.milepost import FEET_PER_MILE, Milepost
 from spikemaul.units.span import Span, merge_all, subtract_all, total_miles
+from spikemaul.units.speed import Speed, minutes_lost, slowest
 
 __all__ = [
     "FEET_PER_MILE",
@@ -16,8 +17,11 @@ __all__ = [
     "Equation",
     "Milepost",
     "Span",
+    "Speed",
     "Stretch",
     "merge_all",
+    "minutes_lost",
+    "slowest",
     "subtract_all",
     "total_miles",
 ]
