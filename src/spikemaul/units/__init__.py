@@ -13,6 +13,7 @@ from spikemaul.units.milepost import FEET_PER_MILE, Milepost
 from spikemaul.units.span import Span, merge_all, subtract_all, total_miles
 from spikemaul.units.speed import Speed, minutes_lost, slowest
 from spikemaul.units.temperature import Sky, Temperature, rail_temperature
+from spikemaul.units.tonnage import Tonnage, accumulated, annual_rate
 
 __all__ = [
     "FEET_PER_MILE",
@@ -27,6 +28,9 @@ __all__ = [
     "Speed",
     "Stretch",
     "Temperature",
+    "Tonnage",
+    "accumulated",
+    "annual_rate",
     "equilibrium_elevation",
     "gauge_deviation",
     "maximum_speed",
