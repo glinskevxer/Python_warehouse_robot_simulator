@@ -12,6 +12,7 @@ from spikemaul.units.measure import STANDARD_GAUGE, Inches, gauge_deviation, wid
 from spikemaul.units.milepost import FEET_PER_MILE, Milepost
 from spikemaul.units.span import Span, merge_all, subtract_all, total_miles
 from spikemaul.units.speed import Speed, minutes_lost, slowest
+from spikemaul.units.temperature import Sky, Temperature, rail_temperature
 
 __all__ = [
     "FEET_PER_MILE",
@@ -21,14 +22,17 @@ __all__ = [
     "Equation",
     "Inches",
     "Milepost",
+    "Sky",
     "Span",
     "Speed",
     "Stretch",
+    "Temperature",
     "equilibrium_elevation",
     "gauge_deviation",
     "maximum_speed",
     "merge_all",
     "minutes_lost",
+    "rail_temperature",
     "slowest",
     "subtract_all",
     "total_miles",
