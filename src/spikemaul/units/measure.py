@@ -20,7 +20,7 @@ from spikemaul.errors import InputError
 
 SIXTEENTHS_PER_INCH: Final = 16
 
-_MIXED = re.compile(r"^(-)?(?:(\d+))?(?:[\s-]*(\d+)/(\d+))?$")
+_MIXED = re.compile(r"^(-)?(?:(\d+)[\s-]+(\d+)/(\d+)|(\d+)/(\d+)|(\d+))$")
 _DECIMAL = re.compile(r"^-?\d+(?:\.\d+)?$")
 
 
@@ -50,11 +50,14 @@ class Inches:
         if _DECIMAL.match(raw):
             return cls.from_decimal(Decimal(raw))
         found = _MIXED.match(raw)
-        if found is None or (found.group(2) is None and found.group(3) is None):
+        if found is None:
             raise InputError(f"{text!r} is not a measurement in inches")
-        whole = int(found.group(2) or 0)
-        numerator = int(found.group(3) or 0)
-        denominator = int(found.group(4) or 1)
+        if found.group(2) is not None:
+            whole, numerator, denominator = (int(found.group(n)) for n in (2, 3, 4))
+        elif found.group(5) is not None:
+            whole, numerator, denominator = 0, int(found.group(5)), int(found.group(6))
+        else:
+            whole, numerator, denominator = int(found.group(7)), 0, 1
         value = cls.of(whole, numerator, denominator)
         return -value if found.group(1) else value
 
