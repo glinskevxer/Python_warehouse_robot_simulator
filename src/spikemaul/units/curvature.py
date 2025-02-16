@@ -97,6 +97,10 @@ class Curvature:
         return f"{degrees} deg {minutes:02d} min"
 
 
+TANGENT: Final = Curvature(0)
+"""Straight track, which has no curve speed of its own."""
+
+
 def equilibrium_elevation(curve: Curvature, speed: Speed) -> Decimal:
     """The elevation a curve would need to be in balance at that speed."""
     if curve.is_tangent:
