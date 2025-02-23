@@ -34,6 +34,29 @@ class Traffic(Enum):
             raise InputError(f"{text!r} is not freight or passenger") from exc
 
 
+class TrackKind(Enum):
+    """What the piece of track is for, which the frequency tables key on."""
+
+    MAIN = "main"
+    SIDING = "siding"
+    YARD = "yard"
+    INDUSTRY = "industry"
+
+    @classmethod
+    def parse(cls, text: str) -> TrackKind:
+        """Read the kind of track off a chart."""
+        try:
+            return cls(text.strip().lower())
+        except ValueError as exc:
+            named = ", ".join(kind.value for kind in cls)
+            raise InputError(f"{text!r} is not a kind of track, expected one of {named}") from exc
+
+    @property
+    def is_main(self) -> bool:
+        """Whether trains run over it under timetable authority."""
+        return self is TrackKind.MAIN
+
+
 class ClassOfTrack(Enum):
     """A class of track, excepted through five."""
 
