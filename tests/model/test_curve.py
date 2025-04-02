@@ -5,8 +5,9 @@ from __future__ import annotations
 import pytest
 
 from spikemaul.errors import InputError
-from spikemaul.model.curve import Curve, Hand
+from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.model.side import Hand
 from spikemaul.units.curvature import Curvature
 from spikemaul.units.measure import Inches
 from spikemaul.units.milepost import Milepost
@@ -27,13 +28,6 @@ def curve(**changes: object) -> Curve:
     }
     fields.update(changes)
     return Curve(**fields)  # type: ignore[arg-type]
-
-
-def test_the_hand_reads_off_the_chart() -> None:
-    assert Hand.parse("left") == Hand.LEFT
-    assert Hand.parse(" RIGHT ") == Hand.RIGHT
-    with pytest.raises(InputError, match="not a hand"):
-        Hand.parse("west")
 
 
 def test_a_curve_of_no_degrees_is_tangent_and_is_not_recorded() -> None:

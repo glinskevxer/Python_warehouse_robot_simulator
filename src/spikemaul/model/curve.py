@@ -16,10 +16,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from decimal import Decimal
-from enum import Enum
 
 from spikemaul.errors import InputError
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.model.side import Hand
 from spikemaul.units.curvature import (
     MAX_UNBALANCE,
     Curvature,
@@ -34,21 +34,6 @@ from spikemaul.units.speed import Speed
 
 RUNOFF_INCHES_PER_FOOT = Decimal("0.0125")
 """The steepest elevation runoff this railroad builds, an inch in eighty feet."""
-
-
-class Hand(Enum):
-    """Which way the curve turns, looking in the direction mileposts increase."""
-
-    LEFT = "left"
-    RIGHT = "right"
-
-    @classmethod
-    def parse(cls, text: str) -> Hand:
-        """Read the hand off the chart."""
-        try:
-            return cls(text.strip().lower())
-        except ValueError as exc:
-            raise InputError(f"{text!r} is not a hand, expected left or right") from exc
 
 
 @dataclass(frozen=True)

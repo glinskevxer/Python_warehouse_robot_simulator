@@ -6,11 +6,11 @@ import pytest
 
 from spikemaul.errors import InputError
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.model.side import Hand
 from spikemaul.model.turnout import (
     FROG_FLANGEWAY_MIN,
     POINT_GAP_LIMIT,
     FrogKind,
-    Hand,
     Throw,
     Turnout,
 )

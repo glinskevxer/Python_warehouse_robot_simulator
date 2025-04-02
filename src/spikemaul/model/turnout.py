@@ -19,6 +19,7 @@ from typing import Final
 
 from spikemaul.errors import InputError
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.model.side import Hand
 from spikemaul.units.measure import Inches
 from spikemaul.units.milepost import Milepost
 from spikemaul.units.speed import Speed
@@ -31,13 +32,6 @@ FROG_FLANGEWAY_MIN: Final = Inches.of(1, 1, 2)
 
 GUARD_CHECK_MIN: Final = Inches.of(54, 1, 8)
 """Guard check gauge, measured from the guard face to the far running rail."""
-
-
-class Hand(Enum):
-    """Which way the diverging route goes, facing the points."""
-
-    LEFT = "left"
-    RIGHT = "right"
 
 
 class FrogKind(Enum):
