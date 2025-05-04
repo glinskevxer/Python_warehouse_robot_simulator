@@ -57,6 +57,30 @@ MIGRATIONS: tuple[Migration, ...] = (
             """,
         ),
     ),
+    Migration(
+        number=2,
+        name="segments",
+        statements=(
+            """
+            CREATE TABLE segments (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                authorized INTEGER NOT NULL,
+                rail_section TEXT NOT NULL,
+                rail_laid TEXT NOT NULL,
+                welded INTEGER NOT NULL DEFAULT 0,
+                note TEXT NOT NULL DEFAULT '',
+                CHECK (end_post > begin_post),
+                CHECK (authorized BETWEEN 0 AND 5),
+                CHECK (welded IN (0, 1))
+            )
+            """,
+            "CREATE INDEX segments_by_place ON segments (subdivision, begin_post)",
+        ),
+    ),
 )
 
 
