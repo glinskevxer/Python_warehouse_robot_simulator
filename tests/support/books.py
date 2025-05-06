@@ -4,12 +4,16 @@ from __future__ import annotations
 
 from datetime import date
 
+from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.line import Segment, Subdivision
+from spikemaul.model.side import Hand
 from spikemaul.standards.classes import ClassOfTrack, TrackKind
 from spikemaul.store.book import Book, new_book
 from spikemaul.store.migrations import migrate
 from spikemaul.units.chainage import Chainage, Equation
+from spikemaul.units.curvature import Curvature
+from spikemaul.units.measure import Inches
 from spikemaul.units.milepost import Milepost
 from spikemaul.units.span import Span
 
@@ -67,4 +71,25 @@ def a_segment(
         rail_section="115 RE",
         rail_laid=date(1998, 6, 1),
         welded=welded,
+    )
+
+
+def a_curve(
+    number: str = "118",
+    body: str = "13.10-13.40",
+    degrees: int = 3,
+    elevation: str = "2",
+    subdivision: str = "PLAINS",
+    spirals: int = 200,
+) -> Curve:
+    """A curve record with a spiral at each end."""
+    return Curve(
+        ident=Ident.named(Kind.CURVE, number),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        body=Span.parse(body),
+        curvature=Curvature.of(degrees),
+        elevation=Inches.parse(elevation),
+        hand=Hand.LEFT,
+        entry_spiral_feet=spirals,
+        exit_spiral_feet=spirals,
     )

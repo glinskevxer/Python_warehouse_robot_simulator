@@ -81,6 +81,30 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX segments_by_place ON segments (subdivision, begin_post)",
         ),
     ),
+    Migration(
+        number=3,
+        name="curves",
+        statements=(
+            """
+            CREATE TABLE curves (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                curvature INTEGER NOT NULL,
+                elevation INTEGER NOT NULL,
+                hand TEXT NOT NULL,
+                entry_spiral_feet INTEGER NOT NULL DEFAULT 0,
+                exit_spiral_feet INTEGER NOT NULL DEFAULT 0,
+                CHECK (end_post > begin_post),
+                CHECK (curvature > 0),
+                CHECK (elevation >= 0),
+                CHECK (entry_spiral_feet >= 0 AND exit_spiral_feet >= 0)
+            )
+            """,
+            "CREATE INDEX curves_by_place ON curves (subdivision, begin_post)",
+        ),
+    ),
 )
 
 
