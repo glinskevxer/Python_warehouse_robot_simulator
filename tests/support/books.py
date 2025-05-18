@@ -8,6 +8,7 @@ from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.line import Segment, Subdivision
 from spikemaul.model.side import Hand
+from spikemaul.model.turnout import FrogKind, Throw, Turnout
 from spikemaul.standards.classes import ClassOfTrack, TrackKind
 from spikemaul.store.book import Book, new_book
 from spikemaul.store.migrations import migrate
@@ -92,4 +93,24 @@ def a_curve(
         hand=Hand.LEFT,
         entry_spiral_feet=spirals,
         exit_spiral_feet=spirals,
+    )
+
+
+def a_turnout(
+    number: str = "31",
+    at: str = "18.60",
+    size: int = 10,
+    subdivision: str = "PLAINS",
+    leads_to: str = "Bartels elevator",
+) -> Turnout:
+    """A hand throw turnout off the main."""
+    return Turnout(
+        ident=Ident.named(Kind.TURNOUT, number),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        point_of_switch=Milepost.parse(at),
+        size=size,
+        hand=Hand.RIGHT,
+        frog=FrogKind.RIGID,
+        throw=Throw.HAND,
+        leads_to=leads_to,
     )

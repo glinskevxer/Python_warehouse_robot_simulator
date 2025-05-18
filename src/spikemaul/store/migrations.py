@@ -105,6 +105,27 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX curves_by_place ON curves (subdivision, begin_post)",
         ),
     ),
+    Migration(
+        number=4,
+        name="turnouts",
+        statements=(
+            """
+            CREATE TABLE turnouts (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                point_of_switch INTEGER NOT NULL,
+                size INTEGER NOT NULL,
+                hand TEXT NOT NULL,
+                frog TEXT NOT NULL,
+                throw TEXT NOT NULL,
+                leads_to TEXT NOT NULL DEFAULT '',
+                CHECK (point_of_switch >= 0),
+                CHECK (size > 0)
+            )
+            """,
+            "CREATE INDEX turnouts_by_place ON turnouts (subdivision, point_of_switch)",
+        ),
+    ),
 )
 
 
