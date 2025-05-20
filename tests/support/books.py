@@ -8,6 +8,14 @@ from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.line import Segment, Subdivision
 from spikemaul.model.side import Hand
+from spikemaul.model.structure import (
+    Bridge,
+    Crossing,
+    Structure,
+    Surface,
+    WarningDevice,
+    check_letter,
+)
 from spikemaul.model.turnout import FrogKind, Throw, Turnout
 from spikemaul.standards.classes import ClassOfTrack, TrackKind
 from spikemaul.store.book import Book, new_book
@@ -113,4 +121,44 @@ def a_turnout(
         frog=FrogKind.RIGID,
         throw=Throw.HAND,
         leads_to=leads_to,
+    )
+
+
+def a_crossing(
+    number: str = "244",
+    at: str = "22.10",
+    road: str = "County Road 14",
+    digits: int = 244160,
+    subdivision: str = "PLAINS",
+) -> Crossing:
+    """A public crossing with flashers on it."""
+    return Crossing(
+        ident=Ident.named(Kind.CROSSING, number),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        at=Milepost.parse(at),
+        road=road,
+        inventory=f"{digits:06d}{check_letter(digits)}",
+        surface=Surface.RUBBER,
+        warning=WarningDevice.FLASHERS,
+    )
+
+
+def a_bridge(
+    number: str = "77",
+    at: str = "34.80",
+    normal: int = 60,
+    maximum: int = 72,
+    subdivision: str = "PLAINS",
+) -> Bridge:
+    """A three span deck girder over a creek."""
+    return Bridge(
+        ident=Ident.named(Kind.BRIDGE, number),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        at=Milepost.parse(at),
+        kind=Structure.DECK_GIRDER,
+        spans=3,
+        length_feet=186,
+        normal_rating=normal,
+        maximum_rating=maximum,
+        built=1927,
     )

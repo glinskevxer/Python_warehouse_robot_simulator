@@ -126,6 +126,43 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX turnouts_by_place ON turnouts (subdivision, point_of_switch)",
         ),
     ),
+    Migration(
+        number=5,
+        name="crossings and bridges",
+        statements=(
+            """
+            CREATE TABLE crossings (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                at_post INTEGER NOT NULL,
+                road TEXT NOT NULL,
+                inventory TEXT NOT NULL UNIQUE,
+                surface TEXT NOT NULL,
+                warning TEXT NOT NULL,
+                public INTEGER NOT NULL DEFAULT 1,
+                CHECK (at_post >= 0),
+                CHECK (public IN (0, 1))
+            )
+            """,
+            """
+            CREATE TABLE bridges (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                at_post INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                spans INTEGER NOT NULL,
+                length_feet INTEGER NOT NULL,
+                normal_rating INTEGER NOT NULL,
+                maximum_rating INTEGER NOT NULL,
+                built INTEGER NOT NULL,
+                CHECK (spans > 0 AND length_feet > 0),
+                CHECK (maximum_rating >= normal_rating)
+            )
+            """,
+            "CREATE INDEX crossings_by_place ON crossings (subdivision, at_post)",
+            "CREATE INDEX bridges_by_place ON bridges (subdivision, at_post)",
+        ),
+    ),
 )
 
 
