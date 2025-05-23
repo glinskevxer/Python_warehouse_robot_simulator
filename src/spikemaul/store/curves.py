@@ -15,12 +15,11 @@ where it cannot.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, ClassVar
 
-from spikemaul.errors import DuplicateError, NotFoundError
 from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.side import Hand
-from spikemaul.store.book import Book
 from spikemaul.store.codec import (
     decode_curvature,
     decode_enum,
@@ -33,70 +32,69 @@ from spikemaul.store.codec import (
     encode_inches,
     encode_span,
 )
+from spikemaul.store.register import Register
 from spikemaul.units.milepost import Milepost
 from spikemaul.units.span import Span
-
-COLUMNS = (
-    "ident, subdivision, begin_post, end_post, curvature, elevation, hand, "
-    "entry_spiral_feet, exit_spiral_feet"
-)
 
 WIDEST_SPIRAL_FEET = 1000
 """How far either side of a body the search looks for spirals."""
 
 
 @dataclass
-class Curves:
+class Curves(Register[Curve]):
     """Every curve on the railroad."""
 
-    book: Book
+    table: ClassVar[str] = "curves"
+    kind: ClassVar[Kind] = Kind.CURVE
+    ordered_by: ClassVar[str] = "subdivision, begin_post"
+    columns: ClassVar[tuple[str, ...]] = (
+        "ident",
+        "subdivision",
+        "begin_post",
+        "end_post",
+        "curvature",
+        "elevation",
+        "hand",
+        "entry_spiral_feet",
+        "exit_spiral_feet",
+    )
 
-    def add(self, curve: Curve) -> None:
-        """Write a new curve."""
-        if self.exists(curve.ident):
-            raise DuplicateError("curve", str(curve.ident))
-        begin, end = encode_span(curve.body)
-        self.book.execute(
-            f"INSERT INTO curves ({COLUMNS}) VALUES (?,?,?,?,?,?,?,?,?)",
-            (
-                encode_ident(curve.ident),
-                encode_ident(curve.subdivision),
-                begin,
-                end,
-                encode_curvature(curve.curvature),
-                encode_inches(curve.elevation),
-                encode_enum(curve.hand),
-                curve.entry_spiral_feet,
-                curve.exit_spiral_feet,
-            ),
+    def ident_of(self, record: Curve) -> Ident:
+        """The curve number."""
+        return record.ident
+
+    def row_of(self, record: Curve) -> tuple[Any, ...]:
+        """The curve as columns."""
+        begin, end = encode_span(record.body)
+        return (
+            encode_ident(record.ident),
+            encode_ident(record.subdivision),
+            begin,
+            end,
+            encode_curvature(record.curvature),
+            encode_inches(record.elevation),
+            encode_enum(record.hand),
+            record.entry_spiral_feet,
+            record.exit_spiral_feet,
         )
 
-    def exists(self, ident: Ident) -> bool:
-        """Whether that curve is in the book."""
-        return self.book.one("SELECT 1 FROM curves WHERE ident = ?", (str(ident),)) is not None
-
-    def get(self, ident: Ident) -> Curve:
-        """One curve by its number."""
-        row = self.book.one(
-            f"SELECT {COLUMNS} FROM curves WHERE ident = ?",
-            (str(ident),),
+    def record_of(self, row: Any) -> Curve:
+        """The columns back as a curve."""
+        fields = dict(row)
+        return Curve(
+            ident=decode_ident(fields["ident"], Kind.CURVE),
+            subdivision=decode_ident(fields["subdivision"], Kind.SUBDIVISION),
+            body=decode_span(fields["begin_post"], fields["end_post"]),
+            curvature=decode_curvature(fields["curvature"]),
+            elevation=decode_inches(fields["elevation"]),
+            hand=decode_enum(Hand, fields["hand"]),
+            entry_spiral_feet=int(fields["entry_spiral_feet"]),
+            exit_spiral_feet=int(fields["exit_spiral_feet"]),
         )
-        if row is None:
-            raise NotFoundError("curve", str(ident))
-        return _read(row)
-
-    def all(self) -> list[Curve]:
-        """Every curve, in subdivision and milepost order."""
-        rows = self.book.query(f"SELECT {COLUMNS} FROM curves ORDER BY subdivision, begin_post")
-        return [_read(row) for row in rows]
 
     def on(self, subdivision: Ident) -> list[Curve]:
         """Every curve on one subdivision, in milepost order."""
-        rows = self.book.query(
-            f"SELECT {COLUMNS} FROM curves WHERE subdivision = ? ORDER BY begin_post",
-            (str(subdivision),),
-        )
-        return [_read(row) for row in rows]
+        return self.where("subdivision = ?", (str(subdivision),), "begin_post")
 
     def at(self, subdivision: Ident, post: Milepost) -> Curve | None:
         """The curve a milepost is in, spirals included, or nothing."""
@@ -113,55 +111,8 @@ class Curves:
         reach = round(WIDEST_SPIRAL_FEET * 100 / 5280) + 1
         begin = max(span.begin.hundredths - reach, 0)
         end = span.end.hundredths + reach
-        rows = self.book.query(
-            f"SELECT {COLUMNS} FROM curves "
-            "WHERE subdivision = ? AND begin_post < ? AND end_post > ? ORDER BY begin_post",
+        return self.where(
+            "subdivision = ? AND begin_post < ? AND end_post > ?",
             (str(subdivision), end, begin),
+            "begin_post",
         )
-        return [_read(row) for row in rows]
-
-    def update(self, curve: Curve) -> None:
-        """Write a curve that is already in the book."""
-        if not self.exists(curve.ident):
-            raise NotFoundError("curve", str(curve.ident))
-        begin, end = encode_span(curve.body)
-        self.book.execute(
-            "UPDATE curves SET subdivision = ?, begin_post = ?, end_post = ?, curvature = ?, "
-            "elevation = ?, hand = ?, entry_spiral_feet = ?, exit_spiral_feet = ? WHERE ident = ?",
-            (
-                encode_ident(curve.subdivision),
-                begin,
-                end,
-                encode_curvature(curve.curvature),
-                encode_inches(curve.elevation),
-                encode_enum(curve.hand),
-                curve.entry_spiral_feet,
-                curve.exit_spiral_feet,
-                encode_ident(curve.ident),
-            ),
-        )
-
-    def remove(self, ident: Ident) -> None:
-        """Take a curve out of the book."""
-        if not self.exists(ident):
-            raise NotFoundError("curve", str(ident))
-        self.book.execute("DELETE FROM curves WHERE ident = ?", (str(ident),))
-
-    def count(self) -> int:
-        """How many curves are in the book."""
-        row = self.book.one("SELECT COUNT(*) AS n FROM curves")
-        return 0 if row is None else int(row["n"])
-
-
-def _read(row: object) -> Curve:
-    fields = dict(row)  # type: ignore[call-overload]
-    return Curve(
-        ident=decode_ident(fields["ident"], Kind.CURVE),
-        subdivision=decode_ident(fields["subdivision"], Kind.SUBDIVISION),
-        body=decode_span(fields["begin_post"], fields["end_post"]),
-        curvature=decode_curvature(fields["curvature"]),
-        elevation=decode_inches(fields["elevation"]),
-        hand=decode_enum(Hand, fields["hand"]),
-        entry_spiral_feet=int(fields["entry_spiral_feet"]),
-        exit_spiral_feet=int(fields["exit_spiral_feet"]),
-    )

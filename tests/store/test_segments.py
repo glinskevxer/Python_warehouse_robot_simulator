@@ -131,3 +131,10 @@ def test_a_segment_on_a_subdivision_that_is_not_there_is_refused() -> None:
     segments = register()
     with pytest.raises(BookError, match="FOREIGN KEY"):
         segments.add(a_segment(subdivision="NOWHERE"))
+
+
+def test_the_generic_register_still_refuses_a_number_twice_before_the_overlap() -> None:
+    segments = register()
+    segments.add(a_segment())
+    with pytest.raises(DuplicateError, match="segment SG-014 is already"):
+        segments.add(a_segment())
