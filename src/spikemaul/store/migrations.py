@@ -163,6 +163,27 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX bridges_by_place ON bridges (subdivision, at_post)",
         ),
     ),
+    Migration(
+        number=6,
+        name="inspections",
+        statements=(
+            """
+            CREATE TABLE inspections (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                on_day TEXT NOT NULL,
+                by_person TEXT NOT NULL,
+                method TEXT NOT NULL,
+                scope TEXT NOT NULL,
+                note TEXT NOT NULL DEFAULT '',
+                CHECK (end_post > begin_post)
+            )
+            """,
+            "CREATE INDEX inspections_by_day ON inspections (subdivision, scope, on_day)",
+        ),
+    ),
 )
 
 

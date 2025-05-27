@@ -6,6 +6,7 @@ from datetime import date
 
 from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.model.inspection import Inspection, Method, Scope
 from spikemaul.model.line import Segment, Subdivision
 from spikemaul.model.side import Hand
 from spikemaul.model.structure import (
@@ -161,4 +162,25 @@ def a_bridge(
         normal_rating=normal,
         maximum_rating=maximum,
         built=1927,
+    )
+
+
+def an_inspection(
+    sequence: int = 41,
+    on: date = date(2025, 4, 14),
+    span: str = "0.00-61.40",
+    scope: Scope = Scope.TRACK,
+    method: Method = Method.HI_RAIL,
+    by: str = "RSTIVERS",
+    subdivision: str = "PLAINS",
+) -> Inspection:
+    """A hi rail trip over the north end of the Plains."""
+    return Inspection(
+        ident=Ident.numbered(Kind.INSPECTION, on.year, sequence),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        span=Span.parse(span),
+        on=on,
+        by=Ident.named(Kind.PERSON, by),
+        method=method,
+        scope=scope,
     )
