@@ -184,6 +184,30 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX inspections_by_day ON inspections (subdivision, scope, on_day)",
         ),
     ),
+    Migration(
+        number=7,
+        name="geometry readings",
+        statements=(
+            """
+            CREATE TABLE readings (
+                inspection TEXT NOT NULL REFERENCES inspections (ident) ON DELETE CASCADE,
+                ordinal INTEGER NOT NULL,
+                at_post INTEGER NOT NULL,
+                gauge INTEGER NOT NULL,
+                crosslevel INTEGER NOT NULL,
+                profile INTEGER NOT NULL,
+                alignment INTEGER NOT NULL,
+                on_curve INTEGER NOT NULL DEFAULT 0,
+                designated_elevation INTEGER,
+                PRIMARY KEY (inspection, ordinal),
+                CHECK (gauge > 0),
+                CHECK (profile >= 0 AND alignment >= 0),
+                CHECK (on_curve IN (0, 1))
+            )
+            """,
+            "CREATE INDEX readings_by_place ON readings (inspection, at_post)",
+        ),
+    ),
 )
 
 

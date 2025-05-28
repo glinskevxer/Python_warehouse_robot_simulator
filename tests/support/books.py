@@ -8,6 +8,7 @@ from spikemaul.model.curve import Curve
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.inspection import Inspection, Method, Scope
 from spikemaul.model.line import Segment, Subdivision
+from spikemaul.model.reading import Reading, Run
 from spikemaul.model.side import Hand
 from spikemaul.model.structure import (
     Bridge,
@@ -183,4 +184,27 @@ def an_inspection(
         by=Ident.named(Kind.PERSON, by),
         method=method,
         scope=scope,
+    )
+
+
+def a_reading(post: str, **changes: object) -> Reading:
+    """One station of a geometry run, tangent and inside every limit."""
+    fields: dict[str, object] = {
+        "at": Milepost.parse(post),
+        "gauge": Inches.parse("56 5/8"),
+        "crosslevel": Inches.parse("1/4"),
+        "profile": Inches.parse("1/2"),
+        "alignment": Inches.parse("3/8"),
+    }
+    fields.update(changes)
+    return Reading(**fields)  # type: ignore[arg-type]
+
+
+def a_run(*posts: str, sequence: int = 52, on: date = date(2025, 5, 6)) -> Run:
+    """A geometry run over the given stations."""
+    return Run(
+        inspection=Ident.numbered(Kind.INSPECTION, on.year, sequence),
+        subdivision=Ident.named(Kind.SUBDIVISION, "PLAINS"),
+        on=on,
+        readings=[a_reading(post) for post in posts],
     )
