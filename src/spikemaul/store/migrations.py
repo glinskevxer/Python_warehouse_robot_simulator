@@ -208,6 +208,30 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX readings_by_place ON readings (inspection, at_post)",
         ),
     ),
+    Migration(
+        number=8,
+        name="defects",
+        statements=(
+            """
+            CREATE TABLE defects (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                at_post INTEGER NOT NULL,
+                found_on TEXT NOT NULL,
+                found_by TEXT NOT NULL,
+                condition TEXT NOT NULL,
+                reading TEXT NOT NULL,
+                meets INTEGER,
+                inspection TEXT REFERENCES inspections (ident),
+                repaired_on TEXT,
+                note TEXT NOT NULL DEFAULT '',
+                CHECK (at_post >= 0),
+                CHECK (meets IS NULL OR meets BETWEEN 0 AND 5)
+            )
+            """,
+            "CREATE INDEX defects_open ON defects (subdivision, repaired_on, at_post)",
+        ),
+    ),
 )
 
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date
 
 from spikemaul.model.curve import Curve
+from spikemaul.model.defect import Condition, Defect
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.inspection import Inspection, Method, Scope
 from spikemaul.model.line import Segment, Subdivision
@@ -207,4 +208,34 @@ def a_run(*posts: str, sequence: int = 52, on: date = date(2025, 5, 6)) -> Run:
         subdivision=Ident.named(Kind.SUBDIVISION, "PLAINS"),
         on=on,
         readings=[a_reading(post) for post in posts],
+    )
+
+
+def a_defect(
+    sequence: int = 142,
+    at: str = "13.22",
+    found_on: date = date(2025, 5, 6),
+    condition: Condition = Condition.GAUGE,
+    reading: str = "57 7/8",
+    meets: ClassOfTrack | None = ClassOfTrack.ONE,
+    subdivision: str = "PLAINS",
+    repaired_on: date | None = None,
+    inspection: int | None = None,
+) -> Defect:
+    """A gauge card off a hi rail trip."""
+    return Defect(
+        ident=Ident.numbered(Kind.DEFECT, found_on.year, sequence),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        at=Milepost.parse(at),
+        found_on=found_on,
+        found_by=Ident.named(Kind.PERSON, "RSTIVERS"),
+        condition=condition,
+        reading=reading,
+        meets=meets,
+        repaired_on=repaired_on,
+        inspection=(
+            None
+            if inspection is None
+            else Ident.numbered(Kind.INSPECTION, found_on.year, inspection)
+        ),
     )
