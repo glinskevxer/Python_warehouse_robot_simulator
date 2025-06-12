@@ -232,6 +232,32 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX defects_open ON defects (subdivision, repaired_on, at_post)",
         ),
     ),
+    Migration(
+        number=9,
+        name="slow orders",
+        statements=(
+            """
+            CREATE TABLE orders (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                speed INTEGER NOT NULL,
+                reason TEXT NOT NULL,
+                effective TEXT NOT NULL,
+                authority TEXT NOT NULL,
+                expires TEXT,
+                lifted_on TEXT,
+                defect TEXT REFERENCES defects (ident),
+                note TEXT NOT NULL DEFAULT '',
+                CHECK (end_post > begin_post),
+                CHECK (speed >= 0),
+                CHECK (expires IS NULL OR expires >= effective)
+            )
+            """,
+            "CREATE INDEX orders_in_force ON orders (subdivision, effective, expires)",
+        ),
+    ),
 )
 
 

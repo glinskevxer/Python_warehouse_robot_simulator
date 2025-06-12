@@ -9,6 +9,7 @@ from spikemaul.model.defect import Condition, Defect
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.inspection import Inspection, Method, Scope
 from spikemaul.model.line import Segment, Subdivision
+from spikemaul.model.order import Reason, SlowOrder
 from spikemaul.model.reading import Reading, Run
 from spikemaul.model.side import Hand
 from spikemaul.model.structure import (
@@ -28,6 +29,7 @@ from spikemaul.units.curvature import Curvature
 from spikemaul.units.measure import Inches
 from spikemaul.units.milepost import Milepost
 from spikemaul.units.span import Span
+from spikemaul.units.speed import Speed
 
 OPENED_ON = date(2025, 1, 6)
 
@@ -238,4 +240,26 @@ def a_defect(
             if inspection is None
             else Ident.numbered(Kind.INSPECTION, found_on.year, inspection)
         ),
+    )
+
+
+def an_order(
+    sequence: int = 31,
+    span: str = "13.00-13.60",
+    mph: int = 10,
+    effective: date = date(2025, 5, 6),
+    reason: Reason = Reason.TRACK_CONDITION,
+    expires: date | None = None,
+    subdivision: str = "PLAINS",
+) -> SlowOrder:
+    """A ten mile an hour order over the curve at MP 13."""
+    return SlowOrder(
+        ident=Ident.numbered(Kind.ORDER, effective.year, sequence),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        span=Span.parse(span),
+        speed=Speed(mph),
+        reason=reason,
+        effective=effective,
+        authority="DKEHOE",
+        expires=expires,
     )
