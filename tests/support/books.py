@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from spikemaul.model.crew import Craft, Gang, Person
 from spikemaul.model.curve import Curve
 from spikemaul.model.defect import Condition, Defect
 from spikemaul.model.ids import Ident, Kind
@@ -262,4 +263,39 @@ def an_order(
         effective=effective,
         authority="DKEHOE",
         expires=expires,
+    )
+
+
+def a_person(
+    initials: str = "RSTIVERS",
+    name: str = "R Stivers",
+    craft: Craft = Craft.INSPECTOR,
+    scopes: frozenset[Scope] = frozenset({Scope.TRACK, Scope.TURNOUTS}),
+    until: date | None = date(2025, 12, 31),
+) -> Person:
+    """Somebody on the books, designated unless told otherwise."""
+    return Person(
+        ident=Ident.named(Kind.PERSON, initials),
+        name=name,
+        craft=craft,
+        qualified_for=scopes,
+        qualified_until=until,
+    )
+
+
+def a_gang(
+    code: str = "SEC2",
+    name: str = "Section 2",
+    foreman: str = "DKEHOE",
+    headcount: int = 4,
+    machines: tuple[str, ...] = ("tamper", "regulator"),
+) -> Gang:
+    """A section gang with a tamper on it."""
+    return Gang(
+        ident=Ident.named(Kind.GANG, code),
+        name=name,
+        foreman=Ident.named(Kind.PERSON, foreman),
+        headcount=headcount,
+        machines=machines,
+        headquarters="Alden",
     )

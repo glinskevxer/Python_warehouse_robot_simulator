@@ -258,6 +258,59 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX orders_in_force ON orders (subdivision, effective, expires)",
         ),
     ),
+    Migration(
+        number=10,
+        name="people and gangs",
+        statements=(
+            """
+            CREATE TABLE people (
+                ident TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                craft TEXT NOT NULL,
+                qualified_for TEXT NOT NULL DEFAULT '',
+                qualified_until TEXT
+            )
+            """,
+            """
+            CREATE TABLE gangs (
+                ident TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                foreman TEXT NOT NULL REFERENCES people (ident),
+                headcount INTEGER NOT NULL,
+                machines TEXT NOT NULL DEFAULT '',
+                headquarters TEXT NOT NULL DEFAULT '',
+                CHECK (headcount > 0)
+            )
+            """,
+        ),
+    ),
+    Migration(
+        number=11,
+        name="work orders",
+        statements=(
+            """
+            CREATE TABLE work_orders (
+                ident TEXT PRIMARY KEY,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                kind TEXT NOT NULL,
+                quantity INTEGER NOT NULL,
+                raised_on TEXT NOT NULL,
+                raised_by TEXT NOT NULL,
+                due_on TEXT,
+                gang TEXT REFERENCES gangs (ident),
+                defect TEXT REFERENCES defects (ident),
+                done_on TEXT,
+                done_quantity INTEGER,
+                note TEXT NOT NULL DEFAULT '',
+                CHECK (end_post > begin_post),
+                CHECK (quantity > 0)
+            )
+            """,
+            "CREATE INDEX work_open ON work_orders (subdivision, done_on, due_on)",
+        ),
+    ),
 )
 
 
