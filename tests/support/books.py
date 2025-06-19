@@ -22,6 +22,7 @@ from spikemaul.model.structure import (
     check_letter,
 )
 from spikemaul.model.turnout import FrogKind, Throw, Turnout
+from spikemaul.model.work import WorkKind, WorkOrder
 from spikemaul.standards.classes import ClassOfTrack, TrackKind
 from spikemaul.store.book import Book, new_book
 from spikemaul.store.migrations import migrate
@@ -298,4 +299,28 @@ def a_gang(
         headcount=headcount,
         machines=machines,
         headquarters="Alden",
+    )
+
+
+def a_work_order(
+    sequence: int = 88,
+    span: str = "13.00-13.60",
+    kind: WorkKind = WorkKind.TIE_RENEWAL,
+    quantity: int = 400,
+    raised_on: date = date(2025, 5, 6),
+    due_on: date | None = None,
+    gang: str | None = None,
+    subdivision: str = "PLAINS",
+) -> WorkOrder:
+    """Four hundred ties over the curve at MP 13."""
+    return WorkOrder(
+        ident=Ident.numbered(Kind.WORK, raised_on.year, sequence),
+        subdivision=Ident.named(Kind.SUBDIVISION, subdivision),
+        span=Span.parse(span),
+        kind=kind,
+        quantity=quantity,
+        raised_on=raised_on,
+        raised_by=Ident.named(Kind.PERSON, "DKEHOE"),
+        due_on=due_on,
+        gang=None if gang is None else Ident.named(Kind.GANG, gang),
     )
