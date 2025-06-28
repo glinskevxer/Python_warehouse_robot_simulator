@@ -311,6 +311,23 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX work_open ON work_orders (subdivision, done_on, due_on)",
         ),
     ),
+    Migration(
+        number=12,
+        name="monthly tonnage",
+        statements=(
+            """
+            CREATE TABLE tonnage (
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                year INTEGER NOT NULL,
+                month INTEGER NOT NULL,
+                hundredths INTEGER NOT NULL,
+                PRIMARY KEY (subdivision, year, month),
+                CHECK (month BETWEEN 1 AND 12),
+                CHECK (hundredths >= 0)
+            )
+            """,
+        ),
+    ),
 )
 
 
