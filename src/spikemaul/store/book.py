@@ -5,6 +5,13 @@ things that would be somebody else's job somewhere else are this module's job
 here: foreign keys on, one writer at a time, and a schema version written into
 the file rather than assumed from the name of the program that opened it.
 
+The connection runs in autocommit, so a single statement is committed when it
+returns and a caller that wants several statements to land together says so
+with :meth:`Book.writing`. The alternative, python's implicit transaction, is
+what this started with, and it meant every register write sat uncommitted
+until something else happened to commit. Every test passed, because a test
+reads back through the same connection that wrote.
+
 Opening a book that does not exist is an error unless the caller says to make
 one. That is deliberate. A typo in a path that quietly creates an empty book
 looks exactly like a book that lost everything, and the roadmaster finds out
@@ -70,13 +77,17 @@ class Book:
         """A transaction that is committed on the way out or rolled back.
 
         Every register method that writes more than one row goes through here,
-        because half a work order is worse than no work order.
+        because half a work order is worse than no work order. A single row
+        write does not need it: the connection is in autocommit, so one
+        statement is already one transaction.
         """
+        self.execute("BEGIN IMMEDIATE")
         try:
-            with self.connection:
-                yield self
-        except sqlite3.Error as exc:
-            raise BookError(str(exc)) from exc
+            yield self
+        except BaseException:
+            self.connection.rollback()
+            raise
+        self.connection.commit()
 
     @property
     def tables(self) -> list[str]:
@@ -108,7 +119,7 @@ def open_book(path: str | Path, create: bool = False) -> Book:
             raise BookError(f"there is no book at {where}")
         if exists and Path(where).is_dir():
             raise BookError(f"{where} is a directory, not a book")
-    connection = sqlite3.connect(where, isolation_level="DEFERRED")
+    connection = sqlite3.connect(where, isolation_level=None)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     connection.execute("PRAGMA journal_mode = WAL")
