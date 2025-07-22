@@ -28,6 +28,7 @@ from spikemaul.store.runs import Runs
 from spikemaul.store.segments import Segments
 from spikemaul.store.structures import Bridges, Crossings
 from spikemaul.store.subdivisions import Subdivisions
+from spikemaul.store.surveys import TieSurveys
 from spikemaul.store.tonnage import TonnageSheets
 from spikemaul.store.turnouts import Turnouts
 from spikemaul.store.work import WorkOrders
@@ -52,6 +53,7 @@ class Records:
     people: People = field(init=False)
     gangs: Gangs = field(init=False)
     tonnage: TonnageSheets = field(init=False)
+    surveys: TieSurveys = field(init=False)
 
     def __post_init__(self) -> None:
         self.subdivisions = Subdivisions(self.book)
@@ -68,6 +70,7 @@ class Records:
         self.people = People(self.book)
         self.gangs = Gangs(self.book)
         self.tonnage = TonnageSheets(self.book)
+        self.surveys = TieSurveys(self.book)
 
     @property
     def schema(self) -> int:
@@ -93,6 +96,7 @@ class Records:
             "work orders": self.work.count(),
             "people": self.people.count(),
             "gangs": self.gangs.count(),
+            "tie surveys": self.surveys.count(),
         }
 
     def is_empty(self) -> bool:

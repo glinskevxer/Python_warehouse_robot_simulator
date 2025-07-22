@@ -328,6 +328,37 @@ MIGRATIONS: tuple[Migration, ...] = (
             """,
         ),
     ),
+    Migration(
+        number=13,
+        name="tie surveys",
+        statements=(
+            """
+            CREATE TABLE tie_surveys (
+                inspection TEXT PRIMARY KEY REFERENCES inspections (ident) ON DELETE CASCADE,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                on_day TEXT NOT NULL,
+                CHECK (end_post > begin_post)
+            )
+            """,
+            """
+            CREATE TABLE tie_lengths (
+                inspection TEXT NOT NULL REFERENCES tie_surveys (inspection) ON DELETE CASCADE,
+                ordinal INTEGER NOT NULL,
+                at_post INTEGER NOT NULL,
+                total INTEGER NOT NULL,
+                good INTEGER NOT NULL,
+                longest_run INTEGER NOT NULL,
+                joints INTEGER NOT NULL DEFAULT 0,
+                joints_supported INTEGER NOT NULL DEFAULT 0,
+                curvature INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (inspection, ordinal),
+                CHECK (total > 0 AND good >= 0 AND good <= total)
+            )
+            """,
+        ),
+    ),
 )
 
 
