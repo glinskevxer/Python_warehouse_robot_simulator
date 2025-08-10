@@ -66,6 +66,8 @@ def test_the_counts_name_every_register_that_holds_records() -> None:
         "people",
         "gangs",
         "tie surveys",
+        "wear readings",
+        "flaw tests",
     }
 
 

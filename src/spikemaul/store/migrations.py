@@ -359,6 +359,40 @@ MIGRATIONS: tuple[Migration, ...] = (
             """,
         ),
     ),
+    Migration(
+        number=14,
+        name="rail wear and flaw testing",
+        statements=(
+            """
+            CREATE TABLE wear_readings (
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                at_post INTEGER NOT NULL,
+                hand TEXT NOT NULL,
+                measured_on TEXT NOT NULL,
+                rail_section TEXT NOT NULL,
+                vertical INTEGER NOT NULL,
+                gauge_face INTEGER NOT NULL,
+                curvature INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (subdivision, at_post, hand, measured_on),
+                CHECK (vertical >= 0 AND gauge_face >= 0)
+            )
+            """,
+            """
+            CREATE TABLE flaw_tests (
+                inspection TEXT PRIMARY KEY REFERENCES inspections (ident) ON DELETE CASCADE,
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                on_day TEXT NOT NULL,
+                tonnage_at INTEGER NOT NULL,
+                found INTEGER NOT NULL DEFAULT 0,
+                CHECK (end_post > begin_post),
+                CHECK (found >= 0)
+            )
+            """,
+            "CREATE INDEX flaw_tests_by_place ON flaw_tests (subdivision, on_day)",
+        ),
+    ),
 )
 
 

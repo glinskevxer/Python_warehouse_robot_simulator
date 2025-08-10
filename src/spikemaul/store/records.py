@@ -24,6 +24,7 @@ from spikemaul.store.defects import Defects
 from spikemaul.store.inspections import Inspections
 from spikemaul.store.migrations import migrate, require_current, version
 from spikemaul.store.orders import Orders
+from spikemaul.store.rails import FlawTests, WearReadings
 from spikemaul.store.runs import Runs
 from spikemaul.store.segments import Segments
 from spikemaul.store.structures import Bridges, Crossings
@@ -54,6 +55,8 @@ class Records:
     gangs: Gangs = field(init=False)
     tonnage: TonnageSheets = field(init=False)
     surveys: TieSurveys = field(init=False)
+    wear: WearReadings = field(init=False)
+    flaw_tests: FlawTests = field(init=False)
 
     def __post_init__(self) -> None:
         self.subdivisions = Subdivisions(self.book)
@@ -71,6 +74,8 @@ class Records:
         self.gangs = Gangs(self.book)
         self.tonnage = TonnageSheets(self.book)
         self.surveys = TieSurveys(self.book)
+        self.wear = WearReadings(self.book)
+        self.flaw_tests = FlawTests(self.book)
 
     @property
     def schema(self) -> int:
@@ -97,6 +102,8 @@ class Records:
             "people": self.people.count(),
             "gangs": self.gangs.count(),
             "tie surveys": self.surveys.count(),
+            "wear readings": self.wear.count(),
+            "flaw tests": self.flaw_tests.count(),
         }
 
     def is_empty(self) -> bool:
