@@ -393,6 +393,26 @@ MIGRATIONS: tuple[Migration, ...] = (
             "CREATE INDEX flaw_tests_by_place ON flaw_tests (subdivision, on_day)",
         ),
     ),
+    Migration(
+        number=15,
+        name="destress log",
+        statements=(
+            """
+            CREATE TABLE destress (
+                subdivision TEXT NOT NULL REFERENCES subdivisions (ident),
+                begin_post INTEGER NOT NULL,
+                end_post INTEGER NOT NULL,
+                on_day TEXT NOT NULL,
+                neutral INTEGER NOT NULL,
+                by_person TEXT NOT NULL,
+                method TEXT NOT NULL,
+                note TEXT NOT NULL DEFAULT '',
+                PRIMARY KEY (subdivision, begin_post, on_day),
+                CHECK (end_post > begin_post)
+            )
+            """,
+        ),
+    ),
 )
 
 

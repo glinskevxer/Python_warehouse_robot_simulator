@@ -21,6 +21,7 @@ from spikemaul.store.book import Book, new_book, open_book
 from spikemaul.store.crew import Gangs, People
 from spikemaul.store.curves import Curves
 from spikemaul.store.defects import Defects
+from spikemaul.store.destress import DestressLog
 from spikemaul.store.inspections import Inspections
 from spikemaul.store.migrations import migrate, require_current, version
 from spikemaul.store.orders import Orders
@@ -57,6 +58,7 @@ class Records:
     surveys: TieSurveys = field(init=False)
     wear: WearReadings = field(init=False)
     flaw_tests: FlawTests = field(init=False)
+    destress: DestressLog = field(init=False)
 
     def __post_init__(self) -> None:
         self.subdivisions = Subdivisions(self.book)
@@ -76,6 +78,7 @@ class Records:
         self.surveys = TieSurveys(self.book)
         self.wear = WearReadings(self.book)
         self.flaw_tests = FlawTests(self.book)
+        self.destress = DestressLog(self.book)
 
     @property
     def schema(self) -> int:
@@ -104,6 +107,7 @@ class Records:
             "tie surveys": self.surveys.count(),
             "wear readings": self.wear.count(),
             "flaw tests": self.flaw_tests.count(),
+            "destress entries": self.destress.count(),
         }
 
     def is_empty(self) -> bool:

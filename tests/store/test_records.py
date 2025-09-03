@@ -68,6 +68,7 @@ def test_the_counts_name_every_register_that_holds_records() -> None:
         "tie surveys",
         "wear readings",
         "flaw tests",
+        "destress entries",
     }
 
 
