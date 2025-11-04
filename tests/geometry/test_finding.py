@@ -120,3 +120,33 @@ def test_findings_come_back_in_milepost_order() -> None:
     )
     found = findings(run, CLASS_THREE)
     assert [str(one.at) for one in found] == ["12.00", "12.02"]
+
+
+def test_a_curve_marked_up_from_the_chart_is_left_to_the_elevation_channel() -> None:
+    marked = a_reading(
+        "13.20",
+        on_curve=True,
+        crosslevel=Inches.parse("2"),
+        designated_elevation=Inches.parse("2"),
+    )
+    run = run_of(marked, a_reading("13.30"))
+    assert crosslevel_findings(run, CLASS_THREE) == []
+    assert elevation_findings(run, CLASS_THREE) == []
+
+
+def test_a_curve_that_has_lost_its_elevation_is_still_found() -> None:
+    marked = a_reading(
+        "13.20",
+        on_curve=True,
+        crosslevel=Inches.parse("1/4"),
+        designated_elevation=Inches.parse("2"),
+    )
+    run = run_of(marked, a_reading("13.30"))
+    assert crosslevel_findings(run, CLASS_THREE) == []
+    assert [one.condition.value for one in elevation_findings(run, CLASS_THREE)] == ["elevation"]
+
+
+def test_a_curve_reading_the_chart_does_not_cover_is_still_read_as_crosslevel() -> None:
+    unmarked = a_reading("13.20", on_curve=True, crosslevel=Inches.parse("2"))
+    run = run_of(unmarked, a_reading("13.30"))
+    assert [one.condition.value for one in crosslevel_findings(run, CLASS_THREE)] == ["crosslevel"]

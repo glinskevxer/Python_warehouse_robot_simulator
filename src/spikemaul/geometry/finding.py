@@ -75,9 +75,18 @@ def gauge_findings(run: Run, held_at: ClassOfTrack) -> list[Finding]:
 
 
 def crosslevel_findings(run: Run, held_at: ClassOfTrack) -> list[Finding]:
-    """Crosslevel readings outside the limits for a class."""
+    """Crosslevel readings outside the limits for a class.
+
+    A station in a curve that has been marked up from the chart is left to the
+    elevation channel. Its crosslevel is the elevation the track is supposed
+    to be carrying, and reading two inches of designed superelevation as two
+    inches of crosslevel deviation makes an exception out of every curve on
+    the railroad.
+    """
     out = []
     for reading in run.readings:
+        if reading.designated_elevation is not None:
+            continue
         found = _finding(
             reading,
             Condition.CROSSLEVEL,
