@@ -10,6 +10,7 @@ from __future__ import annotations
 import click
 
 from spikemaul import __version__
+from spikemaul.cli.assets import bridge, crossing, curve, turnout
 from spikemaul.cli.common import as_day, book_of, book_path, day_of, failing, say
 from spikemaul.cli.line import line
 from spikemaul.store.records import start_records
@@ -51,6 +52,10 @@ def status(context: click.Context) -> None:
 
 
 cli.add_command(line)
+cli.add_command(curve)
+cli.add_command(turnout)
+cli.add_command(crossing)
+cli.add_command(bridge)
 
 
 def run() -> None:
