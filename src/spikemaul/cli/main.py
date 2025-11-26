@@ -13,6 +13,7 @@ from spikemaul import __version__
 from spikemaul.cli.assets import bridge, crossing, curve, turnout
 from spikemaul.cli.common import as_day, book_of, book_path, day_of, failing, say
 from spikemaul.cli.crew import gang, person
+from spikemaul.cli.inspections import inspect
 from spikemaul.cli.line import line
 from spikemaul.store.records import start_records
 
@@ -59,6 +60,7 @@ cli.add_command(crossing)
 cli.add_command(bridge)
 cli.add_command(person)
 cli.add_command(gang)
+cli.add_command(inspect)
 
 
 def run() -> None:
