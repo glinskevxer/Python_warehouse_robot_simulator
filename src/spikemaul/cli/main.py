@@ -13,6 +13,7 @@ from spikemaul import __version__
 from spikemaul.cli.assets import bridge, crossing, curve, turnout
 from spikemaul.cli.common import as_day, book_of, book_path, day_of, failing, say
 from spikemaul.cli.crew import gang, person
+from spikemaul.cli.defects import defect
 from spikemaul.cli.geometry import geometry
 from spikemaul.cli.inspections import inspect
 from spikemaul.cli.line import line
@@ -63,6 +64,7 @@ cli.add_command(person)
 cli.add_command(gang)
 cli.add_command(inspect)
 cli.add_command(geometry)
+cli.add_command(defect)
 
 
 def run() -> None:
