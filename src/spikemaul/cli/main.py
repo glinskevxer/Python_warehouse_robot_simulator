@@ -18,6 +18,7 @@ from spikemaul.cli.geometry import geometry
 from spikemaul.cli.inspections import inspect
 from spikemaul.cli.line import line
 from spikemaul.cli.orders import order
+from spikemaul.cli.ties import ties
 from spikemaul.cli.work import work
 from spikemaul.store.records import start_records
 
@@ -69,6 +70,7 @@ cli.add_command(geometry)
 cli.add_command(defect)
 cli.add_command(order)
 cli.add_command(work)
+cli.add_command(ties)
 
 
 def run() -> None:
