@@ -20,6 +20,7 @@ from spikemaul.cli.inspections import inspect
 from spikemaul.cli.line import line
 from spikemaul.cli.orders import order
 from spikemaul.cli.rails import rail
+from spikemaul.cli.reports import report, tonnage
 from spikemaul.cli.ties import ties
 from spikemaul.cli.work import work
 from spikemaul.store.records import start_records
@@ -75,6 +76,8 @@ cli.add_command(work)
 cli.add_command(ties)
 cli.add_command(rail)
 cli.add_command(cwr)
+cli.add_command(report)
+cli.add_command(tonnage)
 
 
 def run() -> None:
