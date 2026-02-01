@@ -88,3 +88,7 @@ def test_a_check_with_nothing_to_report_gives_zero(capsys: object) -> None:
 def test_a_check_with_something_to_report_gives_one() -> None:
     problem = Problem(package_root() / "units" / "milepost.py", 1, "wrong")
     assert report([problem], "sample") == 1
+
+
+def test_a_file_outside_the_package_comes_back_as_its_stem(tmp_path: Path) -> None:
+    assert module_name(tmp_path / "sample.py") == "sample"

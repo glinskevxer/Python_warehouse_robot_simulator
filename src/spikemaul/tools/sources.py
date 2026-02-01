@@ -42,8 +42,16 @@ def suite_files() -> list[Path]:
 
 
 def module_name(path: Path) -> str:
-    """The dotted name of a source file, as it is imported."""
-    relative = path.relative_to(package_root().parent)
+    """The dotted name of a source file, as it is imported.
+
+    A file outside the package, which is what the checks' own tests feed
+    them, comes back as its bare stem rather than raising. A check should be
+    able to look at any file it is pointed at.
+    """
+    try:
+        relative = path.relative_to(package_root().parent)
+    except ValueError:
+        return path.stem
     parts = list(relative.with_suffix("").parts)
     if parts[-1] == "__init__":
         parts.pop()
