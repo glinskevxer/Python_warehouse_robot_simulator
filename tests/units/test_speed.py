@@ -22,7 +22,7 @@ def test_restricted_speed_is_spelled_not_numbered() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "fast", "25.5", "-10", "25 kph"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_something_that_is_not_a_speed_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Speed.parse(text)
 
@@ -69,7 +69,7 @@ def test_a_speed_above_the_normal_one_is_not_a_restriction() -> None:
         minutes_lost(Speed(25), Speed(40), 1.0)
 
 
-def test_speeds_sort_and_compare() -> None:
+def test_a_list_of_speeds_sorts_and_compares() -> None:
     assert sorted([Speed(40), Speed(10), Speed(25)]) == [Speed(10), Speed(25), Speed(40)]
     assert Speed(10) < Speed(25)
     assert Speed(25) == Speed(25)

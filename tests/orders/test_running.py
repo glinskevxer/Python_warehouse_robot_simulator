@@ -27,7 +27,7 @@ def test_running_time_is_the_miles_over_the_speed() -> None:
     assert got.describe() == "3.0 minutes"
 
 
-def test_the_pieces_add_up() -> None:
+def test_the_pieces_of_a_profile_add_up() -> None:
     got = running_time([piece("12.00-13.00", 40), piece("13.00-13.50", 10)])
     assert got.minutes == pytest.approx(1.5 + 3.0)
 

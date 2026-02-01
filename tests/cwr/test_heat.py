@@ -113,7 +113,7 @@ def test_the_crew_gets_the_lower_of_the_cap_and_the_timetable() -> None:
     assert got.speed_with(Speed(10)) == Speed(10)
 
 
-def test_the_morning_call_works_off_the_forecast_and_the_log() -> None:
+def test_the_morning_call_comes_off_the_forecast_and_the_log() -> None:
     got = call_from_forecast(Temperature(100), Sky.CLEAR, log(), Span.parse("13.20-13.40"), ON)
     assert got.rail == Temperature(130)
     assert got.above_neutral == 35

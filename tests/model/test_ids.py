@@ -67,7 +67,7 @@ def test_a_year_that_is_not_a_year_is_refused() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "DF2025-0142", "DF-25-0142", "DF-2025-014", "sg_014", "014"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_a_number_that_is_not_a_number_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Ident.parse(text)
 

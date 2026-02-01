@@ -62,7 +62,7 @@ def test_an_order_lists_and_can_be_assigned(book: str) -> None:
     assert "SEC2" in run(book, "work", "list", "PLAINS").output
 
 
-def test_assigning_twice_exits_four(book: str) -> None:
+def test_assigning_a_second_gang_exits_four(book: str) -> None:
     an_order(book)
     run(book, "work", "assign", "WO-2025-0001", "SEC2")
     again = run(book, "work", "assign", "WO-2025-0001", "SEC2")
@@ -87,7 +87,7 @@ def test_finishing_short_says_how_short(book: str) -> None:
     assert "WO-2025-0001" not in run(book, "work", "list", "PLAINS").output
 
 
-def test_finishing_twice_exits_four(book: str) -> None:
+def test_finishing_an_order_twice_exits_four(book: str) -> None:
     an_order(book)
     run(book, "--on", "2025-06-01", "work", "finish", "WO-2025-0001")
     again = run(book, "--on", "2025-06-02", "work", "finish", "WO-2025-0001")

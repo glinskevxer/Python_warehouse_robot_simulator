@@ -22,7 +22,7 @@ def test_a_temperature_reads_off_a_form_with_or_without_the_unit() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "hot", "95.5", "95C", "--10"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_something_that_is_not_a_temperature_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Temperature.parse(text)
 
@@ -71,6 +71,6 @@ def test_the_hottest_reading_is_the_one_that_governs() -> None:
         hottest_of([])
 
 
-def test_temperatures_sort_and_compare() -> None:
+def test_a_list_of_temperatures_sorts_and_compares() -> None:
     assert sorted([Temperature(90), Temperature(-10)]) == [Temperature(-10), Temperature(90)]
     assert Temperature(90) > Temperature(89)

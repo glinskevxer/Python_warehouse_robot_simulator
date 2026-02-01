@@ -87,7 +87,7 @@ def test_a_run_of_one_reading_has_nothing_to_compare() -> None:
         )
 
 
-def test_a_run_reads_forward() -> None:
+def test_a_run_that_reads_backwards_is_refused() -> None:
     with pytest.raises(InputError, match="a run reads forward"):
         run("12.00", "12.02", "12.01")
     with pytest.raises(InputError, match="a run reads forward"):

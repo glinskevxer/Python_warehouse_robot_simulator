@@ -94,7 +94,7 @@ def test_advancing_off_the_start_of_the_line_is_refused() -> None:
         Milepost.of(0, 10).advanced(-11)
 
 
-def test_mileposts_sort_by_position() -> None:
+def test_a_list_of_mileposts_sorts_by_position() -> None:
     posts = [Milepost.of(44), Milepost.of(43, 20), Milepost.of(43, 2)]
     assert [str(post) for post in sorted(posts)] == ["43.02", "43.20", "44.00"]
 

@@ -121,7 +121,7 @@ def test_the_integrity_checks_pass_on_a_fresh_book() -> None:
         assert book.foreign_key_problems() == []
 
 
-def test_foreign_keys_are_on() -> None:
+def test_a_row_pointing_at_nothing_is_refused() -> None:
     with new_book() as book:
         migrate(book, ON)
         with pytest.raises(BookError, match="FOREIGN KEY"):

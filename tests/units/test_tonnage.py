@@ -31,12 +31,12 @@ def test_a_figure_finer_than_the_sheet_is_refused() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "heavy", "-4", "4,000"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_something_that_is_not_a_tonnage_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Tonnage.parse(text)
 
 
-def test_negative_tonnage_is_refused() -> None:
+def test_tonnage_that_runs_backwards_is_refused() -> None:
     with pytest.raises(InputError, match="does not run backwards"):
         Tonnage(-1)
     with pytest.raises(InputError, match="do not run backwards"):
@@ -83,6 +83,6 @@ def test_a_segment_with_no_traffic_never_reaches_the_cycle() -> None:
         days_to_reach(Tonnage.of(40), Tonnage.of(1), Decimal(0))
 
 
-def test_tonnages_sort_and_compare() -> None:
+def test_a_list_of_tonnages_sorts_and_compares() -> None:
     assert sorted([Tonnage.of(3), Tonnage.of(1)]) == [Tonnage.of(1), Tonnage.of(3)]
     assert Tonnage.of("1.50") > Tonnage.of("1.40")

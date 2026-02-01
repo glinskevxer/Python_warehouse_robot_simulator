@@ -80,7 +80,7 @@ def test_a_designation_can_be_renewed(book: str) -> None:
     assert "2026-12-31" in run(book, "person", "list").output
 
 
-def test_renewing_backwards_exits_four(book: str) -> None:
+def test_renewing_a_designation_backwards_exits_four(book: str) -> None:
     with_an_inspector(book)
     result = run(book, "person", "qualify", "RSTIVERS", "--until", "2025-01-01")
     assert result.exit_code == 4

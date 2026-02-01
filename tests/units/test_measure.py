@@ -59,7 +59,7 @@ def test_the_sign_belongs_on_the_whole_part() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "wide", "1/", "/2", "1 2/", "56 1/2 3/4"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_something_that_is_not_a_measurement_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Inches.parse(text)
 

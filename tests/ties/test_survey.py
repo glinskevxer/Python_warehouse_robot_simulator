@@ -38,7 +38,7 @@ def test_a_survey_with_nothing_counted_is_not_a_survey() -> None:
         survey()
 
 
-def test_a_survey_walks_forward() -> None:
+def test_a_survey_that_walks_backwards_is_refused() -> None:
     with pytest.raises(InputError, match="walks forward"):
         survey(length("13.20"), length("13.10"))
 

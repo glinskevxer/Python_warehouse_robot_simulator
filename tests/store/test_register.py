@@ -51,7 +51,7 @@ def test_a_clause_the_register_wrote_comes_back_in_its_own_order() -> None:
     assert turnouts.first("size = ?", (99,)) is None
 
 
-def test_counting_and_listing_agree() -> None:
+def test_the_count_and_the_listing_agree() -> None:
     turnouts = register()
     turnouts.add(a_turnout())
     turnouts.add(a_turnout(number="33", at="21.00"))

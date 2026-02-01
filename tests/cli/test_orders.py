@@ -100,7 +100,7 @@ def test_the_changes_between_two_days_are_listed(book: str) -> None:
     assert "SO-2025-0001" in result.output
 
 
-def test_no_change_says_so(book: str) -> None:
+def test_a_day_with_no_change_says_so(book: str) -> None:
     result = run(book, "--on", "2025-05-10", "order", "changes", "PLAINS", "2025-05-07")
     assert "no change" in result.output
 

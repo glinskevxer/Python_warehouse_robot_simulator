@@ -111,11 +111,11 @@ def test_merging_a_list_coalesces_overlapping_and_touching_pieces() -> None:
     assert got == [span("43.00", "45.00"), span("46.00", "46.50")]
 
 
-def test_merging_nothing_gives_nothing() -> None:
+def test_merging_an_empty_list_gives_nothing() -> None:
     assert merge_all([]) == []
 
 
-def test_subtracting_several_pieces_works_through_them_in_order() -> None:
+def test_subtracting_several_pieces_takes_them_in_order() -> None:
     left = subtract_all(
         span("40.00", "50.00"),
         [span("41.00", "42.00"), span("41.50", "43.00"), span("49.00", "51.00")],

@@ -33,7 +33,7 @@ def test_a_curvature_finer_than_a_minute_is_refused() -> None:
 
 
 @pytest.mark.parametrize("text", ["", "sharp", "3-90", "-3", "3/4"])
-def test_rubbish_is_refused(text: str) -> None:
+def test_something_that_is_not_a_curvature_is_refused(text: str) -> None:
     with pytest.raises(InputError):
         Curvature.parse(text)
 
