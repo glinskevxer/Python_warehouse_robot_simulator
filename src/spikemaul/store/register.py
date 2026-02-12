@@ -94,9 +94,9 @@ class Register(ABC, Generic[Record]):
 
     def where(self, clause: str, values: tuple[Any, ...], order: str | None = None) -> list[Record]:
         """Records matching a clause the register itself wrote."""
+        by = order or self.ordered_by
         rows = self.book.query(
-            f"SELECT {self._column_list} FROM {self.table} WHERE {clause} "
-            f"ORDER BY {order or self.ordered_by}",
+            f"SELECT {self._column_list} FROM {self.table} WHERE {clause} ORDER BY {by}",
             values,
         )
         return [self.record_of(row) for row in rows]
