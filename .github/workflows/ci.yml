@@ -1,0 +1,187 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]" -c constraints.txt
+      - run: python -m ruff check .
+      - run: python -m ruff format --check .
+      - run: python -m mypy
+
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]" -c constraints.txt
+      - run: python -m spikemaul.tools.check_docstrings
+      - run: python -m spikemaul.tools.check_layers
+      - run: python -m spikemaul.tools.check_clock
+      - run: python -m spikemaul.tools.check_naming
+      - run: python -m spikemaul.tools.check_tests
+      - run: python -m spikemaul.tools.check_wiring
+      - run: python -m spikemaul.tools.check_exports
+      - run: python -m spikemaul.tools.check_sql
+      - run: python -m spikemaul.tools.check_messages
+      - run: python -m spikemaul.tools.check_help
+      - run: python -m spikemaul.tools.check_package
+      - run: python -m spikemaul.tools.check_readme
+      - run: python -m spikemaul.tools.check_design
+      - run: python -m spikemaul.tools.check_workflow
+      - run: python -m spikemaul.tools.schema_dump --check
+      - run: python -m spikemaul.tools.build_docs --check
+
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]" -c constraints.txt
+      - run: python -m pytest -q
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]" -c constraints.txt
+      - run: python -m pytest -q --cov --cov-report=json --cov-report=term-missing
+      - run: python -m spikemaul.tools.coverage_gate --floor 95 --file-floor 80 --worst 5
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage.json
+
+  installed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install .
+      - run: spikemaul --version
+      - run: python -m spikemaul.tools.smoke
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip build
+      - run: python -m build
+      - run: python -m pip install dist/*.whl
+      - run: python -c "import spikemaul; print(spikemaul.__version__)"
+      - run: python -m spikemaul.tools.smoke --quiet
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  walk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install .
+      - name: work a subdivision through the console script
+        run: |
+          set -euo pipefail
+          book=/tmp/walk.sqlite3
+          rm -f "$book"
+          spikemaul --book "$book" init
+          spikemaul --book "$book" line add PLAINS Plains --end 120.00
+          spikemaul --book "$book" line equate PLAINS 61.40 61.15
+          spikemaul --book "$book" line segment PLAINS 014 12.00-14.00 \
+            --laid 1998-06-01 --class 3
+          spikemaul --book "$book" line segment PLAINS 015 14.00-16.00 \
+            --laid 2004-05-01 --class 4 --welded
+          spikemaul --book "$book" line segments PLAINS
+          spikemaul --book "$book" curve add PLAINS 118 13.10-13.40 \
+            --degrees 3 --elevation 2 --spiral 200
+          spikemaul --book "$book" curve list PLAINS
+          spikemaul --book "$book" turnout add PLAINS 31 15.60 --size 10 \
+            --leads-to "Bartels elevator"
+          spikemaul --book "$book" bridge add PLAINS 77 13.80 --length 186 \
+            --spans 3 --normal 60 --maximum 72 --built 1927
+          spikemaul --book "$book" person add RSTIVERS "R Stivers" \
+            --craft inspector --for track,turnouts --until 2026-12-31
+          spikemaul --book "$book" person add DKEHOE "D Kehoe" --craft foreman
+          spikemaul --book "$book" gang add SEC2 "Section 2" --foreman DKEHOE \
+            --headcount 4 --machines "tamper, regulator" --at Alden
+          spikemaul --book "$book" --on 2026-05-19 inspect record PLAINS 12.00-16.00 \
+            --by RSTIVERS
+          spikemaul --book "$book" --on 2026-05-20 inspect due PLAINS --through 2026-05-30
+          spikemaul --book "$book" --on 2026-05-20 defect raise PLAINS 13.22 gauge \
+            --reading "57 7/8" --meets 1 --by RSTIVERS
+          spikemaul --book "$book" --on 2026-05-20 defect action DF-2026-0001
+          spikemaul --book "$book" --on 2026-05-20 order issue PLAINS 13.00-13.60 10 \
+            --authority DKEHOE --defect DF-2026-0001
+          spikemaul --book "$book" --on 2026-05-20 order bulletin PLAINS
+          spikemaul --book "$book" --on 2026-05-20 order profile PLAINS 12.00-16.00
+          spikemaul --book "$book" --on 2026-05-20 order cost PLAINS 12.00-16.00 \
+            --timetable 40
+          spikemaul --book "$book" --on 2026-05-20 work raise PLAINS 13.00-13.60 \
+            "gauge repair" --quantity 200 --by DKEHOE --due 2026-06-19
+          spikemaul --book "$book" work assign WO-2026-0001 SEC2
+          spikemaul --book "$book" --on 2026-05-25 work plan PLAINS SEC2 --days 3
+          spikemaul --book "$book" --on 2026-04-20 cwr destress PLAINS 14.00-16.00 \
+            --neutral 95 --by DKEHOE
+          spikemaul --book "$book" --on 2026-07-15 cwr heat PLAINS 14.00-16.00 --air 100
+          spikemaul --book "$book" --on 2026-05-20 rail measure PLAINS 13.20 \
+            --vertical 1/4 --gauge-face 1/4
+          spikemaul --book "$book" --on 2026-05-20 rail wear PLAINS 12.00-16.00
+          spikemaul --book "$book" tonnage post PLAINS 2026-04 1.20
+          spikemaul --book "$book" --on 2026-05-20 rail cycle PLAINS
+          spikemaul --book "$book" --on 2026-05-20 report morning PLAINS
+          spikemaul --book "$book" --on 2026-05-20 report compliance PLAINS
+          spikemaul --book "$book" status
