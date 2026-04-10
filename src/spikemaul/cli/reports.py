@@ -9,6 +9,7 @@ from spikemaul.model.ids import Ident, Kind
 from spikemaul.report.compliance import compliance_page, standings_for
 from spikemaul.report.layout import Column, Table
 from spikemaul.report.morning import morning_page
+from spikemaul.report.rails import rail_page
 from spikemaul.store.tonnage import MonthlyTonnage
 from spikemaul.units.tonnage import Tonnage
 
@@ -40,6 +41,17 @@ def compliance(context: click.Context, code: str) -> None:
     """The inspection compliance page."""
     records = book_of(context)
     show(compliance_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
+    records.close()
+
+
+@report.command("rail")
+@click.argument("code")
+@click.pass_context
+@failing
+def rail(context: click.Context, code: str) -> None:
+    """The rail page: what is worn and what is due for testing."""
+    records = book_of(context)
+    show(rail_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
     records.close()
 
 

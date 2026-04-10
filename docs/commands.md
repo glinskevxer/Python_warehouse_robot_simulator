@@ -452,6 +452,12 @@ The roadmaster's morning page.
 
 - `CODE`, required
 
+### report rail
+
+The rail page: what is worn and what is due for testing.
+
+- `CODE`, required
+
 ## status
 
 Say what is in the book.
