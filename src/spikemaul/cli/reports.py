@@ -6,6 +6,7 @@ import click
 
 from spikemaul.cli.common import book_of, day_of, failing, say, show
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.report.audit import audit_page
 from spikemaul.report.compliance import compliance_page, standings_for
 from spikemaul.report.layout import Column, Table
 from spikemaul.report.morning import morning_page
@@ -52,6 +53,17 @@ def rail(context: click.Context, code: str) -> None:
     """The rail page: what is worn and what is due for testing."""
     records = book_of(context)
     show(rail_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
+    records.close()
+
+
+@report.command("audit")
+@click.argument("code")
+@click.pass_context
+@failing
+def audit(context: click.Context, code: str) -> None:
+    """What the book does not say, which makes every other page wrong."""
+    records = book_of(context)
+    show(audit_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
     records.close()
 
 

@@ -440,6 +440,12 @@ List the latest reading of each rail in a stretch.
 
 The pages the office prints.
 
+### report audit
+
+What the book does not say, which makes every other page wrong.
+
+- `CODE`, required
+
 ### report compliance
 
 The inspection compliance page.
