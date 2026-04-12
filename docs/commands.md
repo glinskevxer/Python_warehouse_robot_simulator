@@ -326,14 +326,6 @@ Say what went on and what came off between two days.
 - `CODE`, required
 - `SINCE`, required
 
-### order cost
-
-Say what the restrictions on a stretch cost in minutes.
-
-- `CODE`, required
-- `SPAN`, required
-- `--timetable`, required the speed it would run at otherwise
-
 ### order issue
 
 Put a slow order on, as SPAN like 13.00-13.60 and SPEED like 10.
@@ -358,6 +350,7 @@ Print the speed at every foot of a stretch, and what sets it.
 
 - `CODE`, required
 - `SPAN`, required
+- `--timetable` price the restrictions against this speed
 
 ## person
 

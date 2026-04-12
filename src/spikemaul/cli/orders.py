@@ -4,20 +4,12 @@ from __future__ import annotations
 
 import click
 
-from spikemaul.cli.common import as_day, book_of, day_of, failing, say
+from spikemaul.cli.common import as_day, book_of, day_of, failing, say, show
 from spikemaul.errors import InputError
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.order import Reason, SlowOrder
 from spikemaul.orders.bulletin import build, changes_between
-from spikemaul.orders.governing import (
-    caps_from_curves,
-    caps_from_orders,
-    caps_from_segments,
-    gaps,
-    profile,
-)
-from spikemaul.orders.running import cost_of, ranked_by_cost
-from spikemaul.report.layout import Column, Table
+from spikemaul.report.speed import speed_page
 from spikemaul.units.span import Span
 from spikemaul.units.speed import Speed
 
@@ -124,61 +116,19 @@ def changes(context: click.Context, code: str, since: str) -> None:
 @order.command("profile")
 @click.argument("code")
 @click.argument("span")
+@click.option("--timetable", default=None, help="price the restrictions against this speed")
 @click.pass_context
 @failing
-def speed_profile(context: click.Context, code: str, span: str) -> None:
+def speed_profile(context: click.Context, code: str, span: str, timetable: str | None) -> None:
     """Print the speed at every foot of a stretch, and what sets it."""
     records = book_of(context)
-    on = day_of(context)
-    subdivision = Ident.named(Kind.SUBDIVISION, code)
-    over = Span.parse(span)
-    caps = (
-        caps_from_segments(records.segments.covering(subdivision, over))
-        + caps_from_curves(records.curves.covering(subdivision, over))
-        + caps_from_orders(
-            [one for one in records.orders.all() if one.subdivision == subdivision], on
+    show(
+        speed_page(
+            records,
+            Ident.named(Kind.SUBDIVISION, code),
+            Span.parse(span),
+            day_of(context),
+            Speed.parse(timetable) if timetable else None,
         )
     )
-    table = Table(
-        [
-            Column("from"),
-            Column("to"),
-            Column("speed", numeric=True),
-            Column("because"),
-            Column("detail"),
-        ]
-    )
-    for piece in profile(over, caps):
-        table.add(piece.span.begin, piece.span.end, piece.speed.mph, piece.because, piece.detail)
-    for row in table.lines():
-        say(row)
-    for hole in gaps(over, caps):
-        say(f"no record covers {hole}")
-    records.close()
-
-
-@order.command("cost")
-@click.argument("code")
-@click.argument("span")
-@click.option("--timetable", required=True, help="the speed it would run at otherwise")
-@click.pass_context
-@failing
-def cost(context: click.Context, code: str, span: str, timetable: str) -> None:
-    """Say what the restrictions on a stretch cost in minutes."""
-    records = book_of(context)
-    on = day_of(context)
-    subdivision = Ident.named(Kind.SUBDIVISION, code)
-    over = Span.parse(span)
-    caps = (
-        caps_from_segments(records.segments.covering(subdivision, over))
-        + caps_from_curves(records.curves.covering(subdivision, over))
-        + caps_from_orders(
-            [one for one in records.orders.all() if one.subdivision == subdivision], on
-        )
-    )
-    pieces = profile(over, caps)
-    speed = Speed.parse(timetable)
-    say(f"{cost_of(pieces, speed):.1f} minutes lost over {over}")
-    for piece, minutes in ranked_by_cost(pieces, speed):
-        say(f"{minutes:6.1f}  {piece.describe()}")
     records.close()

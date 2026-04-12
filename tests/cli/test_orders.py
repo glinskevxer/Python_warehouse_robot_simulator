@@ -117,22 +117,37 @@ def test_the_profile_shows_the_class_and_then_the_order(book: str) -> None:
 
 def test_the_profile_names_track_with_no_records_on_it(book: str) -> None:
     result = run(book, "--on", "2025-05-10", "order", "profile", "PLAINS", "12.00-20.00")
-    assert "no record covers" in result.output
+    assert "has no segment recorded" in result.output
 
 
-def test_the_cost_ranks_the_restrictions(book: str) -> None:
+def test_the_profile_prices_the_restrictions_when_given_a_timetable(book: str) -> None:
     an_order(book)
     an_order(book, span="14.00-14.20", speed="25")
     result = run(
-        book, "--on", "2025-05-10", "order", "cost", "PLAINS", "12.00-16.00", "--timetable", "40"
+        book,
+        "--on",
+        "2025-05-10",
+        "order",
+        "profile",
+        "PLAINS",
+        "12.00-16.00",
+        "--timetable",
+        "40",
     )
     assert result.exit_code == 0
-    assert "minutes lost" in result.output
-    assert result.output.index("13.00") < result.output.index("14.00")
+    assert "minutes lost against" in result.output
 
 
 def test_a_stretch_with_nothing_on_it_costs_nothing(book: str) -> None:
     result = run(
-        book, "--on", "2025-05-10", "order", "cost", "PLAINS", "12.00-16.00", "--timetable", "40"
+        book,
+        "--on",
+        "2025-05-10",
+        "order",
+        "profile",
+        "PLAINS",
+        "12.00-16.00",
+        "--timetable",
+        "40",
     )
     assert "0.0 minutes lost" in result.output
