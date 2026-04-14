@@ -26,6 +26,7 @@ from spikemaul.tools.sources import (
 )
 
 CROSS_CUTTING: Final[dict[str, str]] = {
+    "test_mains.py": "runs every check's main, which is not one module either",
     "test_persistence.py": (
         "reads the book back through a second connection, which is not one module's job"
     ),
