@@ -129,3 +129,12 @@ def open_book(path: str | Path, create: bool = False) -> Book:
 def new_book() -> Book:
     """A book in memory, which the tests and the dry runs use."""
     return open_book(MEMORY, create=True)
+
+
+def is_open(book: Book) -> bool:
+    """Whether a book still has its connection, which a closed one does not."""
+    try:
+        book.connection.execute("SELECT 1")
+    except Exception:  # noqa: BLE001
+        return False
+    return True

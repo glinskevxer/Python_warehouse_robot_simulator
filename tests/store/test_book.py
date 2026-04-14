@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from spikemaul.errors import BookError
-from spikemaul.store.book import Book, new_book, open_book
+from spikemaul.store.book import Book, is_open, new_book, open_book
 from spikemaul.store.migrations import (
     MIGRATIONS,
     applied,
@@ -142,3 +142,10 @@ def test_the_connection_is_the_only_thing_touching_sqlite() -> None:
     with new_book() as book:
         assert isinstance(book, Book)
         assert isinstance(book.connection, sqlite3.Connection)
+
+
+def test_a_book_says_whether_it_is_still_open() -> None:
+    book = new_book()
+    assert is_open(book)
+    book.close()
+    assert not is_open(book)

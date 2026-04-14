@@ -26,6 +26,10 @@ GENERATED: Final[frozenset[str]] = frozenset({"schema_dump", "build_docs"})
 NOT_RUN: Final[frozenset[str]] = frozenset({"sources", "coverage_gate", "smoke"})
 """Tools that are not checks: a library, a gate with arguments, and a walk."""
 
+PYTHONS: Final[tuple[str, ...]] = ("3.12", "3.13")
+"""The interpreters the tests are run on. The second one is not decoration:
+unclosed sqlite connections are a warning on 3.13 and silence on 3.12."""
+
 
 def workflow() -> Path:
     """Where the workflow is."""
@@ -57,6 +61,9 @@ def problems() -> list[Problem]:
             found.append(Problem(path, 1, f"the workflow does not check {name} is current"))
     if "coverage_gate" not in text:
         found.append(Problem(path, 1, "the workflow does not put a floor under the coverage"))
+    for version in PYTHONS:
+        if f'"{version}"' not in text:
+            found.append(Problem(path, 1, f"the workflow does not run the tests on {version}"))
     return found
 
 

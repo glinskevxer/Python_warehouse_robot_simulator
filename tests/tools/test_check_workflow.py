@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
-from spikemaul.tools.check_workflow import NOT_RUN, check_modules, problems, workflow
+from spikemaul.tools.check_workflow import (
+    NOT_RUN,
+    PYTHONS,
+    check_modules,
+    problems,
+    workflow,
+)
 
 
 def test_the_workflow_runs_every_check_in_this_package() -> None:
@@ -30,3 +36,10 @@ def test_every_check_module_is_named_in_the_workflow_text() -> None:
     text = workflow().read_text(encoding="utf-8")
     for name in check_modules():
         assert f"spikemaul.tools.{name}" in text
+
+
+def test_the_tests_are_run_on_both_interpreters() -> None:
+    text = workflow().read_text(encoding="utf-8")
+    for version in PYTHONS:
+        assert f'"{version}"' in text
+    assert "3.13" in PYTHONS
