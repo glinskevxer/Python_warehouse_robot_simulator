@@ -7,6 +7,8 @@ clock, so a page can be reprinted for a day in the past and say what it said.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import click
 
 from spikemaul import __version__
@@ -23,6 +25,7 @@ from spikemaul.cli.rails import rail
 from spikemaul.cli.reports import report, tonnage
 from spikemaul.cli.ties import ties
 from spikemaul.cli.work import work
+from spikemaul.store.backup import named_for, take
 from spikemaul.store.records import start_records
 
 
@@ -47,6 +50,21 @@ def init(context: click.Context) -> None:
     records = start_records(context.obj["book"], day_of(context))
     say(f"book at {records.book.path}, schema {records.schema}")
     records.close()
+
+
+@cli.command()
+@click.option("--to", "where", default=None, help="where to put the copy")
+@click.pass_context
+@failing
+def backup(context: click.Context, where: str | None) -> None:
+    """Take a copy of the book through sqlite, and check the copy."""
+    records = book_of(context)
+    book = Path(records.book.path)
+    taken = take(records.book, Path(where) if where else named_for(book, day_of(context)))
+    say(taken.describe())
+    records.close()
+    if not taken.is_sound:
+        raise SystemExit(5)
 
 
 @cli.command()

@@ -8,6 +8,12 @@ spikemaul 0.1.0
 - `--on` the day to work as of, as 2025-05-06
 - `--version` Show the version and exit.
 
+## backup
+
+Take a copy of the book through sqlite, and check the copy.
+
+- `--to` where to put the copy
+
 ## bridge
 
 Structures and their load ratings.

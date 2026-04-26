@@ -26,6 +26,7 @@ exists to answer one of them.
 | --- | --- |
 | `init` | make a book, or bring an old one up to this schema |
 | `status` | say what is in the book |
+| `backup` | take a copy through sqlite and check the copy |
 | `line` | subdivisions, equations and segments |
 | `curve` | curves, their elevation and the speed it buys |
 | `turnout` | turnouts and their diverging speeds |

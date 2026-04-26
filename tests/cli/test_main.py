@@ -77,3 +77,31 @@ def test_the_book_defaults_to_a_file_in_this_directory(tmp_path: Path) -> None:
         result = runner.invoke(cli, ["init"], obj={})
         assert result.exit_code == 0
         assert Path("spikemaul.sqlite3").exists()
+
+
+def test_a_backup_is_taken_beside_the_book(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    run("--book", str(where), "init")
+    result = run("--book", str(where), "--on", "2025-06-01", "backup")
+    assert result.exit_code == 0
+    assert "reads clean" in result.output
+    assert (tmp_path / "plains-2025-06-01.sqlite3").exists()
+
+
+def test_a_backup_can_be_told_where_to_go(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    run("--book", str(where), "init")
+    onto = tmp_path / "copies" / "monday.sqlite3"
+    result = run("--book", str(where), "backup", "--to", str(onto))
+    assert result.exit_code == 0
+    assert onto.exists()
+
+
+def test_a_second_backup_to_the_same_place_exits_five(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    run("--book", str(where), "init")
+    onto = tmp_path / "monday.sqlite3"
+    run("--book", str(where), "backup", "--to", str(onto))
+    again = run("--book", str(where), "backup", "--to", str(onto))
+    assert again.exit_code == 5
+    assert "already a backup" in again.output
