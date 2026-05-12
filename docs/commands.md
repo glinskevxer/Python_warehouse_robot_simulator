@@ -164,6 +164,12 @@ Write the repair date on a card.
 
 - `NUMBER`, required
 
+## export
+
+Write the book out as one csv per table.
+
+- `INTO`, required
+
 ## gang
 
 The gangs and the machines they have.

@@ -105,3 +105,22 @@ def test_a_second_backup_to_the_same_place_exits_five(tmp_path: Path) -> None:
     again = run("--book", str(where), "backup", "--to", str(onto))
     assert again.exit_code == 5
     assert "already a backup" in again.output
+
+
+def test_the_book_is_written_out_as_one_csv_per_table(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    run("--book", str(where), "init")
+    into = tmp_path / "csv"
+    result = run("--book", str(where), "export", str(into))
+    assert result.exit_code == 0
+    assert (into / "segments.csv").exists()
+    assert "segments:" in result.output
+
+
+def test_exporting_twice_into_the_same_directory_exits_five(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    run("--book", str(where), "init")
+    into = tmp_path / "csv"
+    run("--book", str(where), "export", str(into))
+    again = run("--book", str(where), "export", str(into))
+    assert again.exit_code == 5

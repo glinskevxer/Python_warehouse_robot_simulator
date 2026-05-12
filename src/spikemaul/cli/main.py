@@ -26,6 +26,7 @@ from spikemaul.cli.reports import report, tonnage
 from spikemaul.cli.ties import ties
 from spikemaul.cli.work import work
 from spikemaul.store.backup import named_for, take
+from spikemaul.store.export import write_all
 from spikemaul.store.records import start_records
 
 
@@ -65,6 +66,18 @@ def backup(context: click.Context, where: str | None) -> None:
     records.close()
     if not taken.is_sound:
         raise SystemExit(5)
+
+
+@cli.command()
+@click.argument("into", type=click.Path())
+@click.pass_context
+@failing
+def export(context: click.Context, into: str) -> None:
+    """Write the book out as one csv per table."""
+    records = book_of(context)
+    for written in write_all(records.book, Path(into)):
+        say(written.describe())
+    records.close()
 
 
 @cli.command()
