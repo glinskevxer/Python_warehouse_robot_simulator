@@ -49,6 +49,7 @@ jobs:
       - run: python -m spikemaul.tools.check_package
       - run: python -m spikemaul.tools.check_readme
       - run: python -m spikemaul.tools.check_design
+      - run: python -m spikemaul.tools.check_schema
       - run: python -m spikemaul.tools.check_workflow
       - run: python -m spikemaul.tools.schema_dump --check
       - run: python -m spikemaul.tools.build_docs --check
