@@ -124,3 +124,19 @@ def test_exporting_twice_into_the_same_directory_exits_five(tmp_path: Path) -> N
     run("--book", str(where), "export", str(into))
     again = run("--book", str(where), "export", str(into))
     assert again.exit_code == 5
+
+
+def test_a_search_finds_a_record_by_its_number(tmp_path: Path) -> None:
+    where = str(tmp_path / "plains.sqlite3")
+    run("--book", where, "init")
+    run("--book", where, "line", "add", "PLAINS", "Plains", "--end", "120.00")
+    result = run("--book", where, "find", "SD-PLAINS")
+    assert result.exit_code == 0
+    assert "subdivision" in result.output
+
+
+def test_a_search_that_finds_nothing_says_so(tmp_path: Path) -> None:
+    where = str(tmp_path / "plains.sqlite3")
+    run("--book", where, "init")
+    result = run("--book", where, "find", "nothing here")
+    assert "nothing in the book matches" in result.output

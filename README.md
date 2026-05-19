@@ -28,6 +28,7 @@ exists to answer one of them.
 | `status` | say what is in the book |
 | `backup` | take a copy through sqlite and check the copy |
 | `export` | write the book out as one csv per table |
+| `find` | look for a number or a name in every register at once |
 | `line` | subdivisions, equations and segments |
 | `curve` | curves, their elevation and the speed it buys |
 | `turnout` | turnouts and their diverging speeds |

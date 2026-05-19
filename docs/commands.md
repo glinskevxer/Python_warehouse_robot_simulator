@@ -170,6 +170,12 @@ Write the book out as one csv per table.
 
 - `INTO`, required
 
+## find
+
+Look for a number or a name in every register at once.
+
+- `TEXT`, required
+
 ## gang
 
 The gangs and the machines they have.

@@ -28,6 +28,7 @@ from spikemaul.cli.work import work
 from spikemaul.store.backup import named_for, take
 from spikemaul.store.export import write_all
 from spikemaul.store.records import start_records
+from spikemaul.store.search import find as search
 
 
 @click.group()
@@ -77,6 +78,21 @@ def export(context: click.Context, into: str) -> None:
     records = book_of(context)
     for written in write_all(records.book, Path(into)):
         say(written.describe())
+    records.close()
+
+
+@cli.command()
+@click.argument("text")
+@click.pass_context
+@failing
+def find(context: click.Context, text: str) -> None:
+    """Look for a number or a name in every register at once."""
+    records = book_of(context)
+    hits = search(records, text)
+    if not hits:
+        say(f"nothing in the book matches {text!r}")
+    for hit in hits:
+        say(hit.describe())
     records.close()
 
 
