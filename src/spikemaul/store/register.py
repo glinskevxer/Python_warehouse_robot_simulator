@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, ClassVar, Generic, TypeVar
 
-from spikemaul.errors import DuplicateError, NotFoundError
+from spikemaul.errors import DuplicateError, InputError, NotFoundError
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.store.book import Book
 
@@ -133,3 +133,21 @@ class Register(ABC, Generic[Record]):
         """How many records are in the book."""
         row = self.book.one(f"SELECT COUNT(*) AS n FROM {self.table}")
         return 0 if row is None else int(row["n"])
+
+    def next_number(self, year: int) -> Ident:
+        """The next number of this kind for a year, off what the book holds.
+
+        Only for records numbered by year. The sequence follows the highest
+        number used that year rather than counting the rows, so a cancelled
+        record leaves a gap and nothing is issued twice.
+        """
+        if not self.kind.is_numbered_by_year:
+            raise InputError(f"a {self._label} number is not issued by sequence")
+        row = self.book.one(
+            f"SELECT MAX(ident) AS last FROM {self.table} WHERE ident LIKE ?",
+            (f"{self.kind.value}-{year}-%",),
+        )
+        if row is None or row["last"] is None:
+            return Ident.numbered(self.kind, year, 1)
+        last = Ident.parse(str(row["last"]), self.kind)
+        return Ident.numbered(self.kind, year, last.sequence + 1)

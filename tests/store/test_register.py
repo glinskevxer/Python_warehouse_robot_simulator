@@ -4,11 +4,21 @@ from __future__ import annotations
 
 import pytest
 
-from spikemaul.errors import DuplicateError, NotFoundError
+from spikemaul.errors import DuplicateError, InputError, NotFoundError
 from spikemaul.model.ids import Ident, Kind
+from spikemaul.store.crew import People
+from spikemaul.store.defects import Defects
+from spikemaul.store.orders import Orders
 from spikemaul.store.subdivisions import Subdivisions
 from spikemaul.store.turnouts import Turnouts
-from tests.support.books import a_book, a_subdivision, a_turnout
+from spikemaul.store.work import WorkOrders
+from tests.support.books import (
+    a_book,
+    a_defect,
+    a_person,
+    a_subdivision,
+    a_turnout,
+)
 
 
 def register() -> Turnouts:
@@ -56,3 +66,55 @@ def test_the_count_and_the_listing_agree() -> None:
     turnouts.add(a_turnout())
     turnouts.add(a_turnout(number="33", at="21.00"))
     assert turnouts.count() == len(turnouts.all()) == 2
+
+
+def test_a_register_not_numbered_by_year_has_no_sequence_to_issue() -> None:
+    turnouts = register()
+    with pytest.raises(InputError, match="not issued by sequence"):
+        turnouts.next_number(2025)
+
+
+def numbered_registers() -> list[tuple[str, Defects | Orders | WorkOrders]]:
+    book = a_book()
+    Subdivisions(book).add(a_subdivision())
+    People(book).add(a_person())
+    return [
+        ("defect", Defects(book)),
+        ("slow order", Orders(book)),
+        ("work order", WorkOrders(book)),
+    ]
+
+
+def test_every_register_numbered_by_year_starts_at_one() -> None:
+    for _, register in numbered_registers():
+        assert register.next_number(2025).sequence == 1
+
+
+def test_the_year_is_part_of_the_number_and_the_sequence_restarts() -> None:
+    book = a_book()
+    Subdivisions(book).add(a_subdivision())
+    People(book).add(a_person())
+    defects = Defects(book)
+    defects.add(a_defect(sequence=7))
+    assert defects.next_number(2025).sequence == 8
+    assert defects.next_number(2026).sequence == 1
+    assert str(defects.next_number(2026)) == "DF-2026-0001"
+
+
+def test_a_gap_left_by_a_cancelled_record_is_not_filled_in() -> None:
+    book = a_book()
+    Subdivisions(book).add(a_subdivision())
+    People(book).add(a_person())
+    defects = Defects(book)
+    defects.add(a_defect(sequence=1))
+    defects.add(a_defect(sequence=3, at="14.00"))
+    defects.remove(Ident.numbered(Kind.DEFECT, 2025, 3))
+    assert defects.next_number(2025).sequence == 2
+
+
+def test_one_register_does_not_take_a_number_from_another() -> None:
+    book = a_book()
+    Subdivisions(book).add(a_subdivision())
+    People(book).add(a_person())
+    Defects(book).add(a_defect(sequence=42))
+    assert Orders(book).next_number(2025).sequence == 1

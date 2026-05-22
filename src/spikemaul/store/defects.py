@@ -124,14 +124,3 @@ class Defects(Register[Defect]):
             (str(subdivision),),
             "at_post",
         )
-
-    def next_number(self, year: int) -> Ident:
-        """The next defect number for a year, following the highest used."""
-        row = self.book.one(
-            "SELECT MAX(ident) AS last FROM defects WHERE ident LIKE ?",
-            (f"DF-{year}-%",),
-        )
-        if row is None or row["last"] is None:
-            return Ident.numbered(Kind.DEFECT, year, 1)
-        last = Ident.parse(str(row["last"]), Kind.DEFECT)
-        return Ident.numbered(Kind.DEFECT, year, last.sequence + 1)

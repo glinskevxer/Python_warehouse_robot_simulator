@@ -121,16 +121,6 @@ class Orders(Register[SlowOrder]):
         """Every order raised against one defect card."""
         return self.where("defect = ?", (str(defect),))
 
-    def next_number(self, year: int) -> Ident:
-        """The next order number for a year."""
-        row = self.book.one(
-            "SELECT MAX(ident) AS last FROM orders WHERE ident LIKE ?", (f"SO-{year}-%",)
-        )
-        if row is None or row["last"] is None:
-            return Ident.numbered(Kind.ORDER, year, 1)
-        last = Ident.parse(str(row["last"]), Kind.ORDER)
-        return Ident.numbered(Kind.ORDER, year, last.sequence + 1)
-
     def remove(self, ident: Ident) -> None:
         """Take back an order raised in error, which is not the same as lifting one."""
         order = self.get(ident)

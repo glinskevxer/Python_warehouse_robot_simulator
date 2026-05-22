@@ -132,13 +132,3 @@ class WorkOrders(Register[WorkOrder]):
     def for_defect(self, defect: Ident) -> list[WorkOrder]:
         """Every order raised off one defect card."""
         return self.where("defect = ?", (str(defect),))
-
-    def next_number(self, year: int) -> Ident:
-        """The next work order number for a year."""
-        row = self.book.one(
-            "SELECT MAX(ident) AS last FROM work_orders WHERE ident LIKE ?", (f"WO-{year}-%",)
-        )
-        if row is None or row["last"] is None:
-            return Ident.numbered(Kind.WORK, year, 1)
-        last = Ident.parse(str(row["last"]), Kind.WORK)
-        return Ident.numbered(Kind.WORK, year, last.sequence + 1)
