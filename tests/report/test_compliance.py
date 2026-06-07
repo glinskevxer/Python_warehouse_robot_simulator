@@ -109,3 +109,28 @@ def test_a_walking_inspection_of_turnouts_counts_for_that_scope_only() -> None:
     by_scope = {one.scope: one for one in got}
     assert not by_scope[Scope.TURNOUTS].is_late
     assert by_scope[Scope.TRACK].is_late
+
+
+def test_the_page_says_what_lapses_inside_the_window() -> None:
+    book = records()
+    text = render(compliance_page(book, PLAINS, date(2025, 12, 1)))
+    assert "designations" in text
+    assert "30 days left" in text
+
+
+def test_the_page_says_what_has_already_lapsed() -> None:
+    book = records()
+    text = render(compliance_page(book, PLAINS, date(2026, 6, 1)))
+    assert "lapsed" in text
+
+
+def test_the_page_names_a_scope_nobody_is_designated_for() -> None:
+    book = records()
+    text = render(compliance_page(book, PLAINS, date(2025, 5, 20)))
+    assert "nobody is designated for joint bars" in text
+
+
+def test_a_quiet_window_says_nothing_lapses() -> None:
+    book = records()
+    text = render(compliance_page(book, PLAINS, date(2025, 5, 20)))
+    assert "nothing lapses inside the window" in text

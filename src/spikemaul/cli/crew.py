@@ -10,6 +10,13 @@ from spikemaul.errors import InputError
 from spikemaul.model.crew import Craft, Gang, Person
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.inspection import Scope
+from spikemaul.program.qualification import (
+    WINDOW_DAYS,
+    lapsed,
+    lapsing,
+    uncovered,
+    window_from,
+)
 from spikemaul.report.layout import Column, Table
 
 
@@ -117,6 +124,26 @@ def list_people(context: click.Context, scope: str | None) -> None:
         )
     for row in table.lines():
         say(row)
+    records.close()
+
+
+@person.command("due")
+@click.option("--within", default=None, type=int, help="days to look ahead")
+@click.pass_context
+@failing
+def designations_due(context: click.Context, within: int | None) -> None:
+    """Say whose designation has run out or runs out soon."""
+    records = book_of(context)
+    on = day_of(context)
+    people = records.people.all()
+    window = WINDOW_DAYS if within is None else within
+    say(f"looking through {window_from(on, window).isoformat()}")
+    for standing in lapsed(people, on):
+        say(f"lapsed   {standing.describe()}")
+    for standing in lapsing(people, on, window):
+        say(f"{standing.days_left:>3} days {standing.describe()}")
+    for scope in uncovered(people, on, tuple(Scope)):
+        say(f"nobody   is designated for {scope.value}")
     records.close()
 
 

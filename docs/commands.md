@@ -384,6 +384,12 @@ Put somebody on the books.
 - `--for` scopes, comma separated
 - `--until` the day the designation runs to
 
+### person due
+
+Say whose designation has run out or runs out soon.
+
+- `--within` days to look ahead
+
 ### person list
 
 List the people, with what they are designated for and until when.

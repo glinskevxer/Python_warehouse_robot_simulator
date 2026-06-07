@@ -19,6 +19,7 @@ from datetime import date
 from spikemaul.model.ids import Ident
 from spikemaul.model.inspection import Scope
 from spikemaul.program.compliance import Standing, standing_for
+from spikemaul.program.qualification import lapsed, lapsing, uncovered, window_from
 from spikemaul.report.layout import Column, Page, Table, count_of
 from spikemaul.store.records import Records
 
@@ -96,6 +97,21 @@ def uncounted_table(standings: list[Standing]) -> Table:
     return table
 
 
+def designation_table(records: Records, on: date) -> Table:
+    """Designations that have run out or run out inside the window."""
+    table = Table([Column("person"), Column("name"), Column("designated for"), Column("state")])
+    people = records.people.all()
+    for standing in lapsed(people, on) + lapsing(people, on):
+        scopes = ", ".join(sorted(one.value for one in standing.person.qualified_for))
+        table.add(
+            standing.person.ident,
+            standing.person.name,
+            scopes,
+            "lapsed" if standing.has_lapsed else f"{standing.days_left} days left",
+        )
+    return table
+
+
 def compliance_page(records: Records, subdivision: Ident, on: date) -> Page:
     """The whole compliance page for one subdivision."""
     record = records.subdivisions.get(subdivision)
@@ -113,4 +129,14 @@ def compliance_page(records: Records, subdivision: Ident, on: date) -> Page:
         uncounted_table(standings),
         empty="every inspection recorded counted towards its cycle",
     )
+
+    page.heading("designations")
+    page.say(f"looking through {window_from(on).isoformat()}")
+    page.table(
+        designation_table(records, on),
+        empty="nothing lapses inside the window",
+    )
+    missing = uncovered(records.people.all(), on, WATCHED)
+    for scope in missing:
+        page.say(f"nobody is designated for {scope.value}")
     return page

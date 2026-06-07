@@ -132,3 +132,30 @@ def test_a_machine_can_be_added_and_not_twice(book: str) -> None:
     again = run(book, "gang", "machine", "SEC2", "spiker")
     assert again.exit_code == 4
     assert "already on" in again.output
+
+
+def test_due_says_whose_designation_runs_out_soon(book: str) -> None:
+    with_an_inspector(book)
+    result = run(book, "--on", "2025-12-01", "person", "due")
+    assert result.exit_code == 0
+    assert "30 days" in result.output
+
+
+def test_due_says_whose_designation_has_run_out(book: str) -> None:
+    with_an_inspector(book)
+    result = run(book, "--on", "2026-06-01", "person", "due")
+    assert "lapsed" in result.output
+
+
+def test_due_names_the_scopes_nobody_covers(book: str) -> None:
+    with_an_inspector(book)
+    result = run(book, "--on", "2025-12-01", "person", "due")
+    assert "nobody   is designated for rail flaw" in result.output
+
+
+def test_due_can_be_asked_to_look_further_ahead(book: str) -> None:
+    with_an_inspector(book)
+    near = run(book, "--on", "2025-06-01", "person", "due")
+    far = run(book, "--on", "2025-06-01", "person", "due", "--within", "365")
+    assert "days" not in near.output.split("nobody")[0].replace("looking through", "")
+    assert "213 days" in far.output
