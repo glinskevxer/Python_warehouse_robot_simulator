@@ -49,7 +49,8 @@ exists to answer one of them.
 
 `docs/commands.md` is the full reference and is generated from the script
 itself. `docs/schema.md` is the shape of the book and is generated from the
-migrations.
+migrations. `docs/glossary.md` is every word the package knows and is
+generated from the enumerations that hold them.
 
 ## The idea worth knowing before reading the code
 

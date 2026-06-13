@@ -20,7 +20,7 @@ from spikemaul.tools.sources import Problem, package_root, project_root, run
 
 WORKFLOW: Final = ".github/workflows/ci.yml"
 
-GENERATED: Final[frozenset[str]] = frozenset({"schema_dump", "build_docs"})
+GENERATED: Final[frozenset[str]] = frozenset({"schema_dump", "build_docs", "build_glossary"})
 """Tools that CI runs with an argument rather than on their own."""
 
 NOT_RUN: Final[frozenset[str]] = frozenset({"sources", "coverage_gate", "smoke"})
