@@ -29,6 +29,7 @@ exists to answer one of them.
 | `backup` | take a copy through sqlite and check the copy |
 | `export` | write the book out as one csv per table |
 | `find` | look for a number or a name in every register at once |
+| `verify` | check the file, the schema and the records, for a cron job |
 | `line` | subdivisions, equations and segments |
 | `curve` | curves, their elevation and the speed it buys |
 | `turnout` | turnouts and their diverging speeds |

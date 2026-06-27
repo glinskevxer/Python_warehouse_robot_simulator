@@ -25,8 +25,10 @@ from spikemaul.cli.rails import rail
 from spikemaul.cli.reports import report, tonnage
 from spikemaul.cli.ties import ties
 from spikemaul.cli.work import work
+from spikemaul.report.audit import holes
 from spikemaul.store.backup import named_for, take
 from spikemaul.store.export import write_all
+from spikemaul.store.migrations import MIGRATIONS
 from spikemaul.store.records import start_records
 from spikemaul.store.search import find as search
 
@@ -82,6 +84,47 @@ def export(context: click.Context, into: str) -> None:
 
 
 @cli.command()
+@click.option("--quiet", is_flag=True, help="say nothing unless something is wrong")
+@click.pass_context
+@failing
+def verify(context: click.Context, quiet: bool) -> None:
+    """Check the file, the schema and the records, and exit one if anything is wrong.
+
+    This is the command to put in a cron job. It asks sqlite whether the file
+    is sound, asks the migrations whether the schema is one this package
+    understands, and asks every subdivision whether the records cover it.
+    """
+    records = book_of(context)
+    on = day_of(context)
+    said: list[str] = []
+    wrong = 0
+
+    said.append(f"schema {records.schema} of {latest_schema()}")
+    for complaint in records.book.check_integrity() + records.book.foreign_key_problems():
+        said.append(f"file: {complaint}")
+        wrong += 1
+
+    for subdivision in records.subdivisions.all():
+        found = holes(records, subdivision.ident, on)
+        said.append(f"{subdivision.code}: {len(found)} holes")
+        for hole in found:
+            said.append(f"  {hole.describe()}")
+        wrong += len(found)
+
+    if not records.subdivisions.all():
+        said.append("the book holds no subdivisions")
+
+    if not quiet or wrong:
+        for one in said:
+            say(one)
+    if wrong:
+        say(f"{wrong} things to put right")
+        raise SystemExit(1)
+    if quiet:
+        say("verify: nothing to put right")
+
+
+@cli.command()
 @click.argument("text")
 @click.pass_context
 @failing
@@ -125,6 +168,11 @@ cli.add_command(rail)
 cli.add_command(cwr)
 cli.add_command(report)
 cli.add_command(tonnage)
+
+
+def latest_schema() -> int:
+    """The migration number this package writes."""
+    return max(one.number for one in MIGRATIONS)
 
 
 def run() -> None:

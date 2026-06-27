@@ -556,6 +556,12 @@ List the turnouts on a subdivision.
 
 - `CODE`, required
 
+## verify
+
+Check the file, the schema and the records, and exit one if anything is wrong.
+
+- `--quiet` say nothing unless something is wrong
+
 ## work
 
 Work orders, what is open and what the gang has this week.

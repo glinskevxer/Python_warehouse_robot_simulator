@@ -140,3 +140,44 @@ def test_a_search_that_finds_nothing_says_so(tmp_path: Path) -> None:
     run("--book", where, "init")
     result = run("--book", where, "find", "nothing here")
     assert "nothing in the book matches" in result.output
+
+
+def a_worked_book(tmp_path: Path) -> str:
+    where = str(tmp_path / "plains.sqlite3")
+    run("--book", where, "init")
+    run("--book", where, "line", "add", "PLAINS", "Plains", "--end", "120.00")
+    run("--book", where, "line", "segment", "PLAINS", "014", "0.00-120.00", "--laid", "1998-06-01")
+    return where
+
+
+def test_verify_says_nothing_is_wrong_with_a_covered_book(tmp_path: Path) -> None:
+    where = a_worked_book(tmp_path)
+    result = run("--book", where, "--on", "2025-05-20", "verify")
+    assert result.exit_code == 0
+    assert "PLAINS: 0 holes" in result.output
+    assert "schema" in result.output
+
+
+def test_verify_says_nothing_at_all_when_told_to_be_quiet(tmp_path: Path) -> None:
+    where = a_worked_book(tmp_path)
+    result = run("--book", where, "--on", "2025-05-20", "verify", "--quiet")
+    assert result.exit_code == 0
+    assert result.output.strip() == "verify: nothing to put right"
+
+
+def test_verify_exits_one_where_the_records_leave_a_hole(tmp_path: Path) -> None:
+    where = str(tmp_path / "plains.sqlite3")
+    run("--book", where, "init")
+    run("--book", where, "line", "add", "PLAINS", "Plains", "--end", "120.00")
+    result = run("--book", where, "--on", "2025-05-20", "verify")
+    assert result.exit_code == 1
+    assert "no segment covers it" in result.output
+    assert "things to put right" in result.output
+
+
+def test_verify_says_so_where_the_book_holds_nothing(tmp_path: Path) -> None:
+    where = str(tmp_path / "plains.sqlite3")
+    run("--book", where, "init")
+    result = run("--book", where, "verify")
+    assert result.exit_code == 0
+    assert "holds no subdivisions" in result.output
