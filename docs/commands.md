@@ -301,6 +301,14 @@ Add an equation point, written back equals ahead.
 
 List the subdivisions.
 
+### line reclass
+
+Hold a segment to another class, which the open cards may refuse.
+
+- `CODE`, required
+- `NUMBER`, required
+- `TRACK_CLASS`, required
+
 ### line segment
 
 Put a segment in the book, as SPAN like 12.00-14.50.

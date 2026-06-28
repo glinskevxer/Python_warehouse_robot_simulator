@@ -7,6 +7,7 @@ import click
 from spikemaul.cli.common import as_day, book_of, failing, say
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.line import Segment, Subdivision
+from spikemaul.program.classing import held_to, would_change
 from spikemaul.report.layout import Column, Table
 from spikemaul.standards.classes import ClassOfTrack, TrackKind
 from spikemaul.units.chainage import Chainage, Equation
@@ -169,6 +170,25 @@ def list_segments(context: click.Context, code: str) -> None:
         )
     for row in table.lines():
         say(row)
+    records.close()
+
+
+@line.command("reclass")
+@click.argument("code")
+@click.argument("number")
+@click.argument("track_class")
+@click.pass_context
+@failing
+def reclass(context: click.Context, code: str, number: str, track_class: str) -> None:
+    """Hold a segment to another class, which the open cards may refuse."""
+    records = book_of(context)
+    subdivision = Ident.named(Kind.SUBDIVISION, code)
+    segment = records.segments.get(Ident.named(Kind.SEGMENT, number))
+    wanted = ClassOfTrack.parse(track_class)
+    cards = records.defects.open_on(subdivision)
+    changed = held_to(segment, wanted, cards)
+    records.segments.update(changed)
+    say(would_change(segment, wanted))
     records.close()
 
 

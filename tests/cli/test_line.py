@@ -130,3 +130,48 @@ def test_a_welded_segment_says_cwr_in_the_listing(book: str) -> None:
         "--welded",
     )
     assert "cwr" in run(book, "line", "segments", "PLAINS").output
+
+
+def with_a_segment(book: str) -> None:
+    with_a_subdivision(book)
+    run(book, "line", "segment", "PLAINS", "014", "12.00-14.00", "--laid", "1998-06-01")
+
+
+def test_a_segment_can_be_held_to_a_lower_class(book: str) -> None:
+    with_a_segment(book)
+    result = run(book, "line", "reclass", "PLAINS", "014", "1")
+    assert result.exit_code == 0
+    assert "goes down from 40 mph to 10 mph" in result.output
+    assert "class 1" in run(book, "line", "segments", "PLAINS").output
+
+
+def test_raising_a_segment_past_its_open_cards_exits_four(book: str) -> None:
+    with_a_segment(book)
+    run(book, "person", "add", "RSTIVERS", "R Stivers", "--craft", "inspector")
+    run(
+        book,
+        "--on",
+        "2025-05-06",
+        "defect",
+        "raise",
+        "PLAINS",
+        "13.22",
+        "gauge",
+        "--reading",
+        "57 7/8",
+        "--meets",
+        "1",
+        "--by",
+        "RSTIVERS",
+    )
+    result = run(book, "line", "reclass", "PLAINS", "014", "4")
+    assert result.exit_code == 4
+    assert "cannot be raised" in result.output
+    assert "DF-2025-0001" in result.output
+
+
+def test_raising_a_segment_with_nothing_in_the_way_is_allowed(book: str) -> None:
+    with_a_segment(book)
+    result = run(book, "line", "reclass", "PLAINS", "014", "4")
+    assert result.exit_code == 0
+    assert "goes up" in result.output
