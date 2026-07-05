@@ -132,3 +132,22 @@ def test_the_plan_fills_the_week_and_says_what_did_not_fit(book: str) -> None:
 
 def test_a_gang_that_is_not_there_exits_three(book: str) -> None:
     assert run(book, "work", "plan", "PLAINS", "SEC9").exit_code == 3
+
+
+def test_the_material_sheet_comes_off_the_open_work(book: str) -> None:
+    an_order(book)
+    result = run(book, "work", "material", "PLAINS")
+    assert result.exit_code == 0
+    assert "400 each crossties" in result.output
+    assert "1600 each spikes" in result.output
+
+
+def test_the_material_sheet_can_be_asked_for_one_gang(book: str) -> None:
+    an_order(book)
+    run(book, "work", "assign", "WO-2025-0001", "SEC2")
+    result = run(book, "work", "material", "PLAINS", "--gang", "SEC2")
+    assert "crossties" in result.output
+
+
+def test_a_book_with_no_open_work_orders_nothing(book: str) -> None:
+    assert "nothing to order" in run(book, "work", "material", "PLAINS").output

@@ -596,6 +596,13 @@ List the work still open on a subdivision.
 - `--gang` only one gang's work
 - `--unassigned` only what nobody is on
 
+### work material
+
+Say what the open work needs on the ground before anybody goes.
+
+- `CODE`, required
+- `--gang` only one gang's work
+
 ### work needs
 
 Say what the open defect cards call for, before anybody is put on it.

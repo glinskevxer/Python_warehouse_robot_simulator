@@ -11,6 +11,7 @@ from spikemaul.model.work import WorkKind, WorkOrder
 from spikemaul.report.layout import Column, Table
 from spikemaul.standards.classes import ClassOfTrack
 from spikemaul.units.span import Span
+from spikemaul.work.material import sheet
 from spikemaul.work.needs import Need, needs_from_defects
 from spikemaul.work.plan import days_needed, plan_week
 
@@ -172,6 +173,35 @@ def needs(context: click.Context, code: str, held: str | None) -> None:
     for one in found:
         say(one.describe())
     say(f"{days_needed(found)} gang days")
+    records.close()
+
+
+@work.command("material")
+@click.argument("code")
+@click.option("--gang", "gang_code", default=None, help="only one gang's work")
+@click.pass_context
+@failing
+def material(context: click.Context, code: str, gang_code: str | None) -> None:
+    """Say what the open work needs on the ground before anybody goes."""
+    records = book_of(context)
+    subdivision = Ident.named(Kind.SUBDIVISION, code)
+    orders = (
+        records.work.for_gang(Ident.named(Kind.GANG, gang_code))
+        if gang_code is not None
+        else records.work.open_on(subdivision)
+    )
+    wanted = [
+        Need(
+            span=one.span,
+            kind=one.kind,
+            quantity=one.quantity,
+            because=str(one.ident),
+            due_on=one.due_on,
+        )
+        for one in orders
+    ]
+    for line in sheet(wanted):
+        say(line)
     records.close()
 
 
