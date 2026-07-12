@@ -11,6 +11,7 @@ from spikemaul.report.compliance import compliance_page, standings_for
 from spikemaul.report.layout import Column, Table
 from spikemaul.report.morning import morning_page
 from spikemaul.report.rails import rail_page
+from spikemaul.report.week import week_page
 from spikemaul.store.tonnage import MonthlyTonnage
 from spikemaul.units.tonnage import Tonnage
 
@@ -64,6 +65,27 @@ def audit(context: click.Context, code: str) -> None:
     """What the book does not say, which makes every other page wrong."""
     records = book_of(context)
     show(audit_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
+    records.close()
+
+
+@report.command("week")
+@click.argument("code")
+@click.argument("gang")
+@click.option("--days", default=5, type=int, help="how many working days to fill")
+@click.pass_context
+@failing
+def week(context: click.Context, code: str, gang: str, days: int) -> None:
+    """The gang's week on one sheet, material and all."""
+    records = book_of(context)
+    show(
+        week_page(
+            records,
+            Ident.named(Kind.SUBDIVISION, code),
+            Ident.named(Kind.GANG, gang),
+            day_of(context),
+            days,
+        )
+    )
     records.close()
 
 

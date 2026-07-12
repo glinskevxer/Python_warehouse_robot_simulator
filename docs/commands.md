@@ -489,6 +489,14 @@ The rail page: what is worn and what is due for testing.
 
 - `CODE`, required
 
+### report week
+
+The gang's week on one sheet, material and all.
+
+- `CODE`, required
+- `GANG`, required
+- `--days` how many working days to fill
+
 ## status
 
 Say what is in the book.

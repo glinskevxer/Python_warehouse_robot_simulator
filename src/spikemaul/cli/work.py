@@ -9,10 +9,11 @@ from spikemaul.errors import InputError, NotFoundError
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.work import WorkKind, WorkOrder
 from spikemaul.report.layout import Column, Table
+from spikemaul.report.week import needs_from
 from spikemaul.standards.classes import ClassOfTrack
 from spikemaul.units.span import Span
 from spikemaul.work.material import sheet
-from spikemaul.work.needs import Need, needs_from_defects
+from spikemaul.work.needs import needs_from_defects
 from spikemaul.work.plan import days_needed, plan_week
 
 
@@ -190,17 +191,7 @@ def material(context: click.Context, code: str, gang_code: str | None) -> None:
         if gang_code is not None
         else records.work.open_on(subdivision)
     )
-    wanted = [
-        Need(
-            span=one.span,
-            kind=one.kind,
-            quantity=one.quantity,
-            because=str(one.ident),
-            due_on=one.due_on,
-        )
-        for one in orders
-    ]
-    for line in sheet(wanted):
+    for line in sheet(needs_from(orders)):
         say(line)
     records.close()
 
@@ -218,16 +209,6 @@ def plan(context: click.Context, code: str, gang_code: str, days: int) -> None:
     subdivision = Ident.named(Kind.SUBDIVISION, code)
     gang = records.gangs.get(Ident.named(Kind.GANG, gang_code))
     orders = records.work.for_gang(gang.ident) or records.work.open_on(subdivision)
-    wanted = [
-        Need(
-            span=one.span,
-            kind=one.kind,
-            quantity=one.quantity,
-            because=str(one.ident),
-            due_on=one.due_on,
-        )
-        for one in orders
-    ]
-    for line in plan_week(gang.ident, wanted, on, days).lines():
+    for line in plan_week(gang.ident, needs_from(orders), on, days).lines():
         say(line)
     records.close()
