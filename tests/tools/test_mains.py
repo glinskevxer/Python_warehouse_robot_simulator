@@ -31,6 +31,7 @@ from spikemaul.tools import (
     check_tests,
     check_wiring,
     check_workflow,
+    release_check,
 )
 from spikemaul.tools.check_workflow import GENERATED, check_modules
 from spikemaul.tools.sources import Problem
@@ -51,6 +52,7 @@ CHECKS: list[ModuleType] = [
     check_tests,
     check_wiring,
     check_workflow,
+    release_check,
 ]
 
 
