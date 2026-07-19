@@ -10,9 +10,11 @@ from spikemaul.report.audit import audit_page
 from spikemaul.report.compliance import compliance_page, standings_for
 from spikemaul.report.layout import Column, Table
 from spikemaul.report.morning import morning_page
+from spikemaul.report.place import place_page
 from spikemaul.report.rails import rail_page
 from spikemaul.report.week import week_page
 from spikemaul.store.tonnage import MonthlyTonnage
+from spikemaul.units.milepost import Milepost
 from spikemaul.units.tonnage import Tonnage
 
 
@@ -43,6 +45,25 @@ def compliance(context: click.Context, code: str) -> None:
     """The inspection compliance page."""
     records = book_of(context)
     show(compliance_page(records, Ident.named(Kind.SUBDIVISION, code), day_of(context)))
+    records.close()
+
+
+@report.command("at")
+@click.argument("code")
+@click.argument("post")
+@click.pass_context
+@failing
+def at(context: click.Context, code: str, post: str) -> None:
+    """Everything the book knows at one milepost."""
+    records = book_of(context)
+    show(
+        place_page(
+            records,
+            Ident.named(Kind.SUBDIVISION, code),
+            Milepost.parse(post),
+            day_of(context),
+        )
+    )
     records.close()
 
 

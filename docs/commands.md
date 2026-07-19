@@ -465,6 +465,13 @@ List the latest reading of each rail in a stretch.
 
 The pages the office prints.
 
+### report at
+
+Everything the book knows at one milepost.
+
+- `CODE`, required
+- `POST`, required
+
 ### report audit
 
 What the book does not say, which makes every other page wrong.
