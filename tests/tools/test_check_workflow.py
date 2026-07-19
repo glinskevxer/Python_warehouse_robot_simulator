@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
+from spikemaul.tools import check_workflow
 from spikemaul.tools.check_workflow import (
     NOT_RUN,
     PYTHONS,
@@ -43,3 +48,26 @@ def test_the_tests_are_run_on_both_interpreters() -> None:
     for version in PYTHONS:
         assert f'"{version}"' in text
     assert "3.13" in PYTHONS
+
+
+def test_a_checkout_with_no_workflow_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(check_workflow, "project_root", lambda: tmp_path)
+    found = [one.says for one in check_workflow.problems()]
+    assert found == ["there is no workflow"]
+
+
+def test_a_workflow_that_misses_a_check_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "ci.yml").parent.mkdir(parents=True, exist_ok=True)
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text("name: ci\n", encoding="utf-8")
+    monkeypatch.setattr(check_workflow, "project_root", lambda: tmp_path)
+    found = [one.says for one in check_workflow.problems()]
+    assert any("does not run spikemaul.tools.check_layers" in one for one in found)
+    assert any("does not check schema_dump is current" in one for one in found)
+    assert any("floor under the coverage" in one for one in found)
+    assert any("does not run the tests on 3.13" in one for one in found)
