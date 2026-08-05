@@ -460,6 +460,7 @@ List the latest reading of each rail in a stretch.
 
 - `CODE`, required
 - `SPAN`, required
+- `--class` mark what is below a class
 
 ## report
 

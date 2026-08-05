@@ -10,9 +10,8 @@ from spikemaul.cli.common import book_of, day_of, failing, say
 from spikemaul.errors import InputError
 from spikemaul.model.ids import Ident, Kind
 from spikemaul.model.side import Hand
-from spikemaul.rail.flaw import status
 from spikemaul.rail.wear import WearReading, tonnage_left, wear_rate
-from spikemaul.report.layout import Column, Table
+from spikemaul.report.rails import cycle_table, wear_table
 from spikemaul.standards.classes import ClassOfTrack
 from spikemaul.store.rails import FlawTest
 from spikemaul.units.curvature import TANGENT, Curvature
@@ -71,36 +70,16 @@ def measure(
 @rail.command("wear")
 @click.argument("code")
 @click.argument("span")
+@click.option("--class", "against", default=None, help="mark what is below a class")
 @click.pass_context
 @failing
-def wear(context: click.Context, code: str, span: str) -> None:
+def wear(context: click.Context, code: str, span: str, against: str | None) -> None:
     """List the latest reading of each rail in a stretch."""
     records = book_of(context)
-    subdivision = Ident.named(Kind.SUBDIVISION, code)
-    table = Table(
-        [
-            Column("milepost"),
-            Column("rail"),
-            Column("section"),
-            Column("vertical"),
-            Column("gauge face"),
-            Column("combined"),
-            Column("holds"),
-            Column("measured"),
-        ]
+    readings = records.wear.within(
+        Ident.named(Kind.SUBDIVISION, code), Span.parse(span), day_of(context)
     )
-    for one in records.wear.within(subdivision, Span.parse(span), day_of(context)):
-        holds = one.class_supported()
-        table.add(
-            one.at,
-            one.hand.value,
-            one.rail_section,
-            one.vertical,
-            one.gauge_face,
-            one.combined,
-            "nothing" if holds is None else holds,
-            one.measured_on,
-        )
+    table = wear_table(readings, ClassOfTrack.parse(against) if against else None)
     for row in table.lines():
         say(row)
     records.close()
@@ -172,39 +151,7 @@ def tested(
 def cycle(context: click.Context, code: str) -> None:
     """Say where each segment stands in its flaw testing cycle."""
     records = book_of(context)
-    on = day_of(context)
-    subdivision = Ident.named(Kind.SUBDIVISION, code)
-    latest = records.tonnage.latest(subdivision)
-    table = Table(
-        [
-            Column("segment"),
-            Column("class"),
-            Column("last tested"),
-            Column("since"),
-            Column("state"),
-            Column("clock"),
-        ]
-    )
-    for segment in records.segments.on(subdivision):
-        last = records.flaw_tests.last_covering(subdivision, segment.span, on)
-        since = Tonnage(0)
-        if last is not None and latest is not None:
-            standing = records.tonnage.since(subdivision, last.on, on)
-            since = standing
-        standing_state = status(
-            segment.authorized,
-            on,
-            last_tested=None if last is None else last.on,
-            tonnage_since=since,
-        )
-        table.add(
-            segment.ident,
-            segment.authorized,
-            last.on if last is not None else "never",
-            since,
-            "due" if standing_state.is_due else "in cycle",
-            standing_state.governing,
-        )
+    table = cycle_table(records, Ident.named(Kind.SUBDIVISION, code), day_of(context))
     for row in table.lines():
         say(row)
     records.close()

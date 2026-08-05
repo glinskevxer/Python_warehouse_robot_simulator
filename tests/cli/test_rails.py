@@ -160,3 +160,43 @@ def test_a_detector_run_on_an_inspection_that_is_not_there_exits_three(book: str
         "124.50",
     )
     assert result.exit_code == 3
+
+
+def test_the_wear_listing_marks_what_is_below_a_class(book: str) -> None:
+    run(
+        book,
+        "--on",
+        "2025-04-01",
+        "rail",
+        "measure",
+        "PLAINS",
+        "13.20",
+        "--vertical",
+        "9/16",
+        "--gauge-face",
+        "5/8",
+    )
+    listed = run(
+        book, "--on", "2025-06-01", "rail", "wear", "PLAINS", "12.00-16.00", "--class", "4"
+    )
+    assert listed.exit_code == 0
+    assert "below the class" in listed.output
+
+
+def test_the_wear_listing_and_the_rail_page_say_the_same_thing(book: str) -> None:
+    a_reading(book, "2025-04-01")
+    listed = run(book, "--on", "2025-06-01", "rail", "wear", "PLAINS", "12.00-16.00")
+    page = run(book, "--on", "2025-06-01", "report", "rail", "PLAINS")
+    assert "13.20" in listed.output
+    assert "13.20" in page.output
+    assert "class 5" in listed.output
+    assert "class 5" in page.output
+
+
+def test_the_cycle_listing_and_the_rail_page_say_the_same_thing(book: str) -> None:
+    listed = run(book, "--on", "2025-09-01", "rail", "cycle", "PLAINS")
+    page = run(book, "--on", "2025-09-01", "report", "rail", "PLAINS")
+    assert "never" in listed.output
+    assert "never" in page.output
+    assert "SG-014" in listed.output
+    assert "SG-014" in page.output
