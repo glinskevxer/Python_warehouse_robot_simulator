@@ -75,6 +75,21 @@ def lift(context: click.Context, number: str) -> None:
     records.close()
 
 
+@order.command("extend")
+@click.argument("number")
+@click.option("--until", default=None, help="the new day it comes off, or none to stand")
+@click.pass_context
+@failing
+def extend(context: click.Context, number: str, until: str | None) -> None:
+    """Change the day a slow order comes off."""
+    records = book_of(context)
+    ident = Ident.parse(number, Kind.ORDER)
+    changed = records.orders.get(ident).extended(as_day(until))
+    records.orders.update(changed)
+    say(changed.describe())
+    records.close()
+
+
 @order.command("bulletin")
 @click.argument("code")
 @click.pass_context

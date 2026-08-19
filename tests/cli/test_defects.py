@@ -135,3 +135,19 @@ def test_the_conditions_are_listed_with_how_they_are_found(book: str) -> None:
     assert "gauge" in result.output
     assert "geometry" in result.output
     assert "walking" in result.output
+
+
+def test_an_open_card_can_be_put_right_from_the_command_line(book: str) -> None:
+    a_card(book)
+    result = run(book, "defect", "amend", "DF-2025-0001", "--reading", "57 3/4", "--meets", "3")
+    assert result.exit_code == 0
+    assert "57 3/4" in result.output
+    assert "meets class 3" in result.output
+
+
+def test_a_repaired_card_cannot_be_amended(book: str) -> None:
+    a_card(book)
+    run(book, "--on", "2025-05-20", "defect", "repair", "DF-2025-0001")
+    result = run(book, "defect", "amend", "DF-2025-0001", "--reading", "57 3/4")
+    assert result.exit_code == 4
+    assert "stands as it is" in result.output

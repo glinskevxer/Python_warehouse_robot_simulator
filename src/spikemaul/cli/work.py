@@ -99,6 +99,29 @@ def finish(context: click.Context, number: str, quantity: int | None) -> None:
     records.close()
 
 
+@work.command("amend")
+@click.argument("number")
+@click.option("--quantity", default=None, type=int, help="what is really wanted")
+@click.option("--due", default=None, help="the day it is really wanted by")
+@click.option("--note", default=None, help="anything worth writing down")
+@click.pass_context
+@failing
+def amend(
+    context: click.Context,
+    number: str,
+    quantity: int | None,
+    due: str | None,
+    note: str | None,
+) -> None:
+    """Put a work order right while it is still open."""
+    records = book_of(context)
+    ident = Ident.parse(number, Kind.WORK)
+    changed = records.work.get(ident).amended(quantity=quantity, due_on=as_day(due), note=note)
+    records.work.update(changed)
+    say(changed.describe())
+    records.close()
+
+
 @work.command("list")
 @click.argument("code")
 @click.option("--gang", "gang_code", default=None, help="only one gang's work")

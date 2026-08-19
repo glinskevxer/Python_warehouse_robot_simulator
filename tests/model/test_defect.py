@@ -115,3 +115,28 @@ def test_a_card_says_itself_in_one_line() -> None:
         .describe()
         .endswith("meets nothing, open")
     )
+
+
+def test_an_open_card_can_be_put_right() -> None:
+    card = defect().amended(reading="57 3/4", meets=ClassOfTrack.THREE, note="re measured")
+    assert card.reading == "57 3/4"
+    assert card.meets == ClassOfTrack.THREE
+    assert card.note == "re measured"
+
+
+def test_amending_leaves_alone_what_it_is_not_given() -> None:
+    card = defect().amended(meets=ClassOfTrack.TWO)
+    assert card.reading == "57 7/8"
+    assert card.note == ""
+
+
+def test_a_card_can_be_corrected_to_meeting_nothing() -> None:
+    card = defect().amended(meets=None)
+    assert card.meets is None
+    assert card.action(ClassOfTrack.THREE).takes_track_out
+
+
+def test_a_repaired_card_stands_as_it_is() -> None:
+    card = defect().repaired(date(2025, 5, 20))
+    with pytest.raises(RuleError, match="stands as it is"):
+        card.amended(reading="57 3/4")

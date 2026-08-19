@@ -88,6 +88,31 @@ def repair(context: click.Context, number: str) -> None:
     records.close()
 
 
+@defect.command("amend")
+@click.argument("number")
+@click.option("--reading", default=None, help="what was really measured")
+@click.option("--meets", default=None, help="the class it really meets, or none")
+@click.option("--note", default=None, help="anything worth writing down")
+@click.pass_context
+@failing
+def amend(
+    context: click.Context,
+    number: str,
+    reading: str | None,
+    meets: str | None,
+    note: str | None,
+) -> None:
+    """Put a card right while it is still open."""
+    records = book_of(context)
+    ident = Ident.parse(number, Kind.DEFECT)
+    card = records.defects.get(ident)
+    wanted = card.meets if meets is None else _class(meets)
+    changed = card.amended(reading=reading, meets=wanted, note=note)
+    records.defects.update(changed)
+    say(changed.describe())
+    records.close()
+
+
 @defect.command("list")
 @click.argument("code")
 @click.option("--all", "everything", is_flag=True, help="repaired cards as well")

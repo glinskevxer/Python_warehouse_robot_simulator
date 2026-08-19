@@ -127,6 +127,15 @@ Say what the rule requires for one card, against the class held today.
 
 - `NUMBER`, required
 
+### defect amend
+
+Put a card right while it is still open.
+
+- `NUMBER`, required
+- `--reading` what was really measured
+- `--meets` the class it really meets, or none
+- `--note` anything worth writing down
+
 ### defect conditions
 
 List the conditions this package records.
@@ -351,6 +360,13 @@ Say what went on and what came off between two days.
 
 - `CODE`, required
 - `SINCE`, required
+
+### order extend
+
+Change the day a slow order comes off.
+
+- `NUMBER`, required
+- `--until` the new day it comes off, or none to stand
 
 ### order issue
 
@@ -589,6 +605,15 @@ Check the file, the schema and the records, and exit one if anything is wrong.
 ## work
 
 Work orders, what is open and what the gang has this week.
+
+### work amend
+
+Put a work order right while it is still open.
+
+- `NUMBER`, required
+- `--quantity` what is really wanted
+- `--due` the day it is really wanted by
+- `--note` anything worth writing down
 
 ### work assign
 

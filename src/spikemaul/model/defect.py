@@ -131,6 +131,29 @@ class Defect:
         due = self.due_on(held_at)
         return due is not None and on > due
 
+    def amended(
+        self,
+        reading: str | None = None,
+        meets: ClassOfTrack | None = None,
+        note: str | None = None,
+    ) -> Defect:
+        """The same card with the reading or the class put right.
+
+        Only an open card. A repaired card is a record of what was found and
+        what was done about it, and changing that after the fact is how an
+        inspector ends up reading two different stories about one morning.
+        The class is passed as it is, ``None`` included, so a card can be
+        corrected to meeting nothing.
+        """
+        if not self.is_open:
+            raise RuleError(f"{self.ident} was repaired on {self.repaired_on} and stands as it is")
+        return replace(
+            self,
+            reading=self.reading if reading is None else reading,
+            meets=meets,
+            note=self.note if note is None else note,
+        )
+
     def repaired(self, on: date) -> Defect:
         """The same card with the repair written on it."""
         if not self.is_open:

@@ -133,6 +133,29 @@ class WorkOrder:
             raise RuleError(f"{self.ident} is already on {self.gang}")
         return replace(self, gang=gang)
 
+    def amended(
+        self, quantity: int | None = None, due_on: date | None = None, note: str | None = None
+    ) -> WorkOrder:
+        """The same order with the quantity or the date put right.
+
+        Only while it is open. A finished order carries what was actually
+        done, and changing what was asked for afterwards makes the shortfall a
+        number nobody can check.
+        """
+        if not self.is_open:
+            raise RuleError(f"{self.ident} was finished on {self.done_on} and stands as it is")
+        wanted = self.quantity if quantity is None else quantity
+        if wanted < 1:
+            raise InputError(f"a {self.kind.value} order for nothing is not an order")
+        if due_on is not None and due_on < self.raised_on:
+            raise RuleError(f"{self.ident} cannot be due before it was raised")
+        return replace(
+            self,
+            quantity=wanted,
+            due_on=self.due_on if due_on is None else due_on,
+            note=self.note if note is None else note,
+        )
+
     def finished(self, on: date, quantity: int | None = None) -> WorkOrder:
         """The same order closed out, with what was actually done."""
         if not self.is_open:

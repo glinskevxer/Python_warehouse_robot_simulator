@@ -126,3 +126,25 @@ def test_the_bulletin_line_says_when_it_comes_off() -> None:
         "SO-2025-0031 PLAINS 13.00 to 13.60 10 mph track condition until removed"
     )
     assert order(expires=date(2025, 5, 10)).describe().endswith("until 2025-05-10")
+
+
+def test_an_order_can_be_given_a_new_day_to_come_off() -> None:
+    changed = order().extended(date(2025, 6, 1))
+    assert changed.expires == date(2025, 6, 1)
+    assert not changed.in_effect_on(date(2025, 6, 2))
+
+
+def test_an_order_can_be_made_to_stand_until_somebody_lifts_it() -> None:
+    changed = order(expires=date(2025, 5, 10)).extended(None)
+    assert changed.is_standing
+
+
+def test_an_order_cannot_be_made_to_come_off_before_it_went_on() -> None:
+    with pytest.raises(RuleError, match="cannot come off before"):
+        order().extended(date(2025, 5, 1))
+
+
+def test_an_order_that_was_lifted_cannot_be_extended() -> None:
+    lifted = order().lifted(date(2025, 5, 8))
+    with pytest.raises(RuleError, match="is finished"):
+        lifted.extended(date(2025, 6, 1))

@@ -151,3 +151,19 @@ def test_the_material_sheet_can_be_asked_for_one_gang(book: str) -> None:
 
 def test_a_book_with_no_open_work_orders_nothing(book: str) -> None:
     assert "nothing to order" in run(book, "work", "material", "PLAINS").output
+
+
+def test_an_open_work_order_can_be_put_right(book: str) -> None:
+    an_order(book)
+    result = run(book, "work", "amend", "WO-2025-0001", "--quantity", "500", "--due", "2025-07-01")
+    assert result.exit_code == 0
+    assert "500 ties" in result.output
+    assert "2025-07-01" in run(book, "work", "list", "PLAINS").output
+
+
+def test_a_finished_work_order_cannot_be_amended(book: str) -> None:
+    an_order(book)
+    run(book, "--on", "2025-06-01", "work", "finish", "WO-2025-0001")
+    result = run(book, "work", "amend", "WO-2025-0001", "--quantity", "500")
+    assert result.exit_code == 4
+    assert "stands as it is" in result.output

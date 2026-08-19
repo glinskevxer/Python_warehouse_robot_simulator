@@ -151,3 +151,20 @@ def test_a_stretch_with_nothing_on_it_costs_nothing(book: str) -> None:
         "40",
     )
     assert "0.0 minutes lost" in result.output
+
+
+def test_an_order_can_be_given_a_new_day_to_come_off(book: str) -> None:
+    an_order(book)
+    result = run(book, "order", "extend", "SO-2025-0001", "--until", "2025-06-01")
+    assert result.exit_code == 0
+    assert "until 2025-06-01" in result.output
+    printed = run(book, "--on", "2025-06-02", "order", "bulletin", "PLAINS")
+    assert "no restrictions in force" in printed.output
+
+
+def test_an_order_that_was_lifted_cannot_be_extended(book: str) -> None:
+    an_order(book)
+    run(book, "--on", "2025-05-08", "order", "lift", "SO-2025-0001")
+    result = run(book, "order", "extend", "SO-2025-0001", "--until", "2025-06-01")
+    assert result.exit_code == 4
+    assert "is finished" in result.output

@@ -115,6 +115,20 @@ class SlowOrder:
         """Whether this order is the one a crew obeys where both apply."""
         return self.speed <= other.speed
 
+    def extended(self, until: date | None) -> SlowOrder:
+        """The same order with a new day it comes off, or none at all.
+
+        An order that has been lifted is finished and cannot be extended. An
+        order can be given no end date, which turns a lapsing order into a
+        standing one, except a heat order, which carries the day it lapses by
+        definition.
+        """
+        if self.lifted_on is not None:
+            raise RuleError(f"{self.ident} was lifted on {self.lifted_on} and is finished")
+        if until is not None and until < self.effective:
+            raise RuleError(f"{self.ident} cannot come off before it went on")
+        return replace(self, expires=until)
+
     def lifted(self, on: date) -> SlowOrder:
         """The same order with the day it came off written on it."""
         if self.lifted_on is not None:

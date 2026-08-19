@@ -121,3 +121,31 @@ def test_an_order_says_itself_in_one_line() -> None:
     )
     line = work().assigned_to(Ident.named(Kind.GANG, "SEC2")).finished(date(2025, 6, 1)).describe()
     assert line.endswith("SEC2 done 2025-06-01")
+
+
+def test_an_open_order_can_be_put_right() -> None:
+    changed = work().amended(quantity=500, due_on=date(2025, 7, 1), note="more than we thought")
+    assert changed.quantity == 500
+    assert changed.due_on == date(2025, 7, 1)
+    assert changed.note == "more than we thought"
+
+
+def test_amending_leaves_alone_what_it_is_not_given() -> None:
+    changed = work(due_on=date(2025, 6, 1)).amended(quantity=500)
+    assert changed.due_on == date(2025, 6, 1)
+
+
+def test_an_order_cannot_be_amended_to_nothing() -> None:
+    with pytest.raises(InputError, match="for nothing is not an order"):
+        work().amended(quantity=0)
+
+
+def test_an_order_cannot_be_made_due_before_it_was_raised() -> None:
+    with pytest.raises(RuleError, match="cannot be due before"):
+        work().amended(due_on=date(2025, 1, 1))
+
+
+def test_a_finished_order_stands_as_it_is() -> None:
+    done = work().finished(date(2025, 6, 1))
+    with pytest.raises(RuleError, match="stands as it is"):
+        done.amended(quantity=500)
