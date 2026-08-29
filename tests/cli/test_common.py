@@ -7,7 +7,14 @@ from pathlib import Path
 
 import pytest
 
-from spikemaul.cli.common import DEFAULT_BOOK, as_day, as_ident, book_path, status_for
+from spikemaul.cli.common import (
+    BOOK_VARIABLE,
+    DEFAULT_BOOK,
+    as_day,
+    as_ident,
+    book_path,
+    status_for,
+)
 from spikemaul.errors import BookError, DuplicateError, InputError, NotFoundError, RuleError
 from spikemaul.model.ids import Kind
 
@@ -39,3 +46,7 @@ def test_every_kind_of_failure_has_its_own_exit_status() -> None:
     assert status_for(DuplicateError("segment", "SG-014")) == 4
     assert status_for(RuleError("x")) == 4
     assert status_for(BookError("x")) == 5
+
+
+def test_the_environment_variable_is_the_one_a_cron_job_would_set() -> None:
+    assert BOOK_VARIABLE == "SPIKEMAUL_BOOK"

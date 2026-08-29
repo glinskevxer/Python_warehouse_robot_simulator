@@ -48,6 +48,9 @@ Returns = TypeVar("Returns")
 
 DEFAULT_BOOK = "spikemaul.sqlite3"
 
+BOOK_VARIABLE = "SPIKEMAUL_BOOK"
+"""The environment variable a cron job sets instead of repeating the path."""
+
 
 def status_for(error: SpikemaulError) -> int:
     """The exit status for a failure, five for anything unexpected."""

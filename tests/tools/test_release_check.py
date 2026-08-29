@@ -104,3 +104,25 @@ def test_packaging_with_no_version_at_all_is_reported(
     monkeypatch.setattr(release_check, "glossary_is_current", lambda: True)
     assert release_check.packaged_version() is None
     assert any("no version" in one.says for one in release_check.problems())
+
+
+def test_the_changelog_has_somewhere_to_write_the_next_change() -> None:
+    assert release_check.has_unreleased()
+
+
+def test_a_changelog_with_no_unreleased_section_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sections = f"## {__version__}\n\nsomething\n"
+    monkeypatch.setattr(
+        release_check, "project_root", lambda: a_tree(tmp_path, __version__, sections)
+    )
+    monkeypatch.setattr(release_check, "schema_is_current", lambda: True)
+    monkeypatch.setattr(release_check, "docs_are_current", lambda: True)
+    monkeypatch.setattr(release_check, "glossary_is_current", lambda: True)
+    found = [one.says for one in release_check.problems()]
+    assert any("no unreleased section" in one for one in found)
+
+
+def test_the_version_being_shipped_is_one_point_zero() -> None:
+    assert __version__ == "1.0.0"

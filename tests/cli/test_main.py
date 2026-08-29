@@ -181,3 +181,27 @@ def test_verify_says_so_where_the_book_holds_nothing(tmp_path: Path) -> None:
     result = run("--book", where, "verify")
     assert result.exit_code == 0
     assert "holds no subdivisions" in result.output
+
+
+def test_the_book_can_come_from_the_environment(tmp_path: Path) -> None:
+    where = tmp_path / "plains.sqlite3"
+    runner = CliRunner(env={"SPIKEMAUL_BOOK": str(where)})
+    made = runner.invoke(cli, ["init"], obj={})
+    assert made.exit_code == 0
+    assert where.exists()
+    listed = runner.invoke(cli, ["status"], obj={})
+    assert "subdivisions" in listed.output
+
+
+def test_the_option_wins_over_the_environment(tmp_path: Path) -> None:
+    named = tmp_path / "named.sqlite3"
+    runner = CliRunner(env={"SPIKEMAUL_BOOK": str(tmp_path / "environment.sqlite3")})
+    made = runner.invoke(cli, ["--book", str(named), "init"], obj={})
+    assert made.exit_code == 0
+    assert named.exists()
+    assert not (tmp_path / "environment.sqlite3").exists()
+
+
+def test_the_version_the_script_prints_is_the_package_version() -> None:
+    result = run("--version")
+    assert "1.0.0" in result.output

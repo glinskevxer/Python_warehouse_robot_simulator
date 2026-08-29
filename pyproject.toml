@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spikemaul"
-version = "0.1.0"
+version = "1.0.0"
 description = "Track department of a shortline railroad: class of track, geometry exceptions, remedial action and slow orders"
 requires-python = ">=3.12"
 dependencies = ["click==8.1.8"]

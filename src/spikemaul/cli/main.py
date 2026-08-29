@@ -13,7 +13,15 @@ import click
 
 from spikemaul import __version__
 from spikemaul.cli.assets import bridge, crossing, curve, turnout
-from spikemaul.cli.common import as_day, book_of, book_path, day_of, failing, say
+from spikemaul.cli.common import (
+    BOOK_VARIABLE,
+    as_day,
+    book_of,
+    book_path,
+    day_of,
+    failing,
+    say,
+)
 from spikemaul.cli.crew import gang, person
 from spikemaul.cli.cwr import cwr
 from spikemaul.cli.defects import defect
@@ -34,7 +42,13 @@ from spikemaul.store.search import find as search
 
 
 @click.group()
-@click.option("--book", "book", default=None, help="the sqlite file to work on")
+@click.option(
+    "--book",
+    "book",
+    default=None,
+    envvar=BOOK_VARIABLE,
+    help="the sqlite file to work on, or set SPIKEMAUL_BOOK",
+)
 @click.option("--on", "on", default=None, help="the day to work as of, as 2025-05-06")
 @click.version_option(__version__, prog_name="spikemaul")
 @click.pass_context

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from spikemaul import __version__
 from spikemaul.tools.build_docs import DOCUMENT, build, is_current, where
 
 
@@ -30,7 +31,7 @@ def test_the_top_level_options_are_at_the_top() -> None:
 def test_the_document_says_it_is_generated_and_names_the_version() -> None:
     text = build()
     assert "Do not edit" in text
-    assert "spikemaul 0." in text
+    assert f"spikemaul {__version__}" in text
 
 
 def test_the_document_lives_in_the_checkout() -> None:

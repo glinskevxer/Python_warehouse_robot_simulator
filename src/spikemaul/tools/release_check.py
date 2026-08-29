@@ -28,6 +28,7 @@ PACKAGING: Final = "pyproject.toml"
 
 VERSION_IN_PACKAGING = re.compile(r'^version = "([^"]+)"', re.MULTILINE)
 RELEASE_HEADING = re.compile(r"^## +([0-9][0-9A-Za-z.\-]*)", re.MULTILINE)
+UNRELEASED_HEADING = re.compile(r"^## +Unreleased", re.MULTILINE)
 
 
 def packaged_version() -> str | None:
@@ -45,10 +46,22 @@ def releases() -> list[str]:
     return RELEASE_HEADING.findall(path.read_text(encoding="utf-8"))
 
 
+def has_unreleased() -> bool:
+    """Whether the changelog has somewhere to write the next change."""
+    path = project_root() / CHANGELOG
+    if not path.exists():
+        return False
+    return bool(UNRELEASED_HEADING.search(path.read_text(encoding="utf-8")))
+
+
 def problems() -> list[Problem]:
     """Everything that would make this a bad day to cut a release."""
     where = Path(project_root() / CHANGELOG)
     found = []
+    if not has_unreleased():
+        found.append(
+            Problem(where, 1, "the changelog has no unreleased section to write the next change in")
+        )
     packaged = packaged_version()
     if packaged is None:
         found.append(Problem(Path(project_root() / PACKAGING), 1, "the packaging has no version"))

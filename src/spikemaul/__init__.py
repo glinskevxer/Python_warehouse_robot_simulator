@@ -5,6 +5,6 @@ The package is layered. Nothing in ``units`` knows about a record, nothing in
 is checked by ``spikemaul.tools.check_layers`` rather than left to memory.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 __all__ = ["__version__"]
