@@ -5,13 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
 
-from spikemaul.cli.main import cli
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
+from tests.support.console import run
 
 
 @pytest.fixture

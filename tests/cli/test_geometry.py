@@ -5,9 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
+from click.testing import Result
 
-from spikemaul.cli.main import cli
+from tests.support.console import run
 
 GOOD = """milepost,gauge,crosslevel,profile,alignment
 12.00,56 5/8,1/4,1/2,3/8
@@ -17,10 +17,6 @@ GOOD = """milepost,gauge,crosslevel,profile,alignment
 """
 
 WIDE = GOOD.replace("13.10,56 5/8", "13.10,57 7/8")
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
 
 
 @pytest.fixture

@@ -5,24 +5,14 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
 
-from spikemaul.cli.main import cli
 from spikemaul.model.structure import check_letter
+from tests.support.console import a_book, run, with_a_subdivision
 
 
 @pytest.fixture
 def book(tmp_path: Path) -> str:
-    where = str(tmp_path / "plains.sqlite3")
-    CliRunner().invoke(cli, ["--book", where, "init"], obj={})
-    CliRunner().invoke(
-        cli, ["--book", where, "line", "add", "PLAINS", "Plains", "--end", "120.00"], obj={}
-    )
-    return where
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
+    return with_a_subdivision(a_book(tmp_path))
 
 
 def test_a_curve_goes_in_and_lists_with_its_speed(book: str) -> None:

@@ -5,9 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
 
-from spikemaul.cli.main import cli
+from tests.support.console import run
 
 
 @pytest.fixture
@@ -31,10 +30,6 @@ def book(tmp_path: Path) -> str:
     )
     run(where, "person", "add", "JHOLT", "J Holt")
     return where
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
 
 
 def test_an_inspection_is_recorded_and_lists(book: str) -> None:

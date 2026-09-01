@@ -5,40 +5,18 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
 
-from spikemaul.cli.main import cli
+from tests.support.console import a_book, run, with_an_inspector
 
 
 @pytest.fixture
 def book(tmp_path: Path) -> str:
-    where = str(tmp_path / "plains.sqlite3")
-    CliRunner().invoke(cli, ["--book", where, "init"], obj={})
-    return where
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
-
-
-def with_an_inspector(book: str) -> Result:
-    return run(
-        book,
-        "person",
-        "add",
-        "RSTIVERS",
-        "R Stivers",
-        "--craft",
-        "inspector",
-        "--for",
-        "track,turnouts",
-        "--until",
-        "2025-12-31",
-    )
+    return a_book(tmp_path)
 
 
 def test_somebody_goes_on_the_books_with_a_designation(book: str) -> None:
-    assert with_an_inspector(book).exit_code == 0
+    with_an_inspector(book)
+    assert run(book, "person", "list").exit_code == 0
     listed = run(book, "--on", "2025-06-01", "person", "list")
     assert "PN-RSTIVERS" in listed.output
     assert "track, turnouts" in listed.output

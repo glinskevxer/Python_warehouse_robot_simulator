@@ -5,19 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner, Result
+from click.testing import Result
 
-from spikemaul.cli.main import cli
+from tests.support.console import run
 
 SHEET = """milepost,total,good,run,joints,supported,degrees
 13.10,22,16,2,1,1,0
 13.11,22,9,2,1,1,0
 13.12,22,10,2,1,0,0
 """
-
-
-def run(book: str, *args: str) -> Result:
-    return CliRunner().invoke(cli, ["--book", book, *args], obj={})
 
 
 @pytest.fixture
