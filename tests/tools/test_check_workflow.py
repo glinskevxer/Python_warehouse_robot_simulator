@@ -71,3 +71,41 @@ def test_a_workflow_that_misses_a_check_is_reported(
     assert any("does not check schema_dump is current" in one for one in found)
     assert any("floor under the coverage" in one for one in found)
     assert any("does not run the tests on 3.13" in one for one in found)
+
+
+def test_the_walk_lines_are_the_ones_that_call_the_script() -> None:
+    lines = check_workflow.walk_lines()
+    assert lines
+    assert all(one.startswith("spikemaul ") for one in lines)
+    assert any("report morning" in one for one in lines)
+
+
+def test_a_line_continued_over_two_rows_is_read_as_one() -> None:
+    joined = [one for one in check_workflow.walk_lines() if "--laid" in one]
+    assert joined
+    assert all("\\" not in one for one in joined)
+
+
+def test_the_commands_the_walk_calls_stop_at_the_first_argument() -> None:
+    found = check_workflow.walk_commands()
+    assert ["line", "add", "PLAINS", "Plains"] in found
+    assert ["init"] in found
+
+
+def test_every_command_the_walk_calls_is_on_the_script() -> None:
+    assert [one.says for one in check_workflow.walk_problems()] == []
+
+
+def test_a_walk_calling_a_command_that_went_away_is_reported(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text(
+        "jobs:\n  walk:\n    steps:\n      - run: |\n"
+        '          spikemaul --book "$book" order cost PLAINS 12.00-16.00\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(check_workflow, "project_root", lambda: tmp_path)
+    found = [one.says for one in check_workflow.walk_problems()]
+    assert any("which is not a command" in one for one in found)

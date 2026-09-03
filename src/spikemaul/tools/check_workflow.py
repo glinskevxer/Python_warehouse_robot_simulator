@@ -1,4 +1,4 @@
-"""Everything under tools is run by CI.
+"""Everything under tools is run by CI, and the walk runs commands that exist.
 
 A check nobody runs is a check that does not exist. Writing one and forgetting
 the line in the workflow is easy, and the failure is silent for exactly as
@@ -9,6 +9,12 @@ So the workflow is read as text and every check module in the package has to
 appear in it. The workflow is yaml and this does not parse it, because the
 question is whether a string is in the file and a parser is a dependency to
 answer that.
+
+The walk job is the other half. It is a shell script inside yaml, so nothing
+compiles it and nothing type checks it, and a command renamed in the package
+leaves a line in there that fails ten minutes into a build. Every command the
+walk calls is looked up in the click tree, which is the same tree the script
+is built from.
 """
 
 from __future__ import annotations
@@ -16,6 +22,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Final
 
+from spikemaul.cli.main import cli
 from spikemaul.tools.sources import Problem, package_root, project_root, run
 
 WORKFLOW: Final = ".github/workflows/ci.yml"
@@ -45,6 +52,73 @@ def check_modules() -> list[str]:
     )
 
 
+def walk_lines() -> list[str]:
+    """The lines of the walk job's shell script, joined where they continue."""
+    path = workflow()
+    if not path.exists():
+        return []
+    text = path.read_text(encoding="utf-8")
+    marker = "run: |\n"
+    out: list[str] = []
+    for block in text.split(marker)[1:]:
+        joined = ""
+        for line in block.splitlines():
+            if line and not line.startswith("          "):
+                break
+            stripped = line.strip()
+            if stripped.endswith("\\"):
+                joined += stripped[:-1] + " "
+                continue
+            out.append((joined + stripped).strip())
+            joined = ""
+    return [one for one in out if one.startswith("spikemaul ")]
+
+
+def walk_commands() -> list[list[str]]:
+    """The command each walk line calls, as the words click would match."""
+    out = []
+    for line in walk_lines():
+        words = []
+        skip = False
+        for word in line.split()[1:]:
+            if skip:
+                skip = False
+                continue
+            if word.startswith("--"):
+                skip = "=" not in word
+                continue
+            if word.startswith(('"', "$", "/")):
+                break
+            words.append(word)
+        if words:
+            out.append(words)
+    return out
+
+
+def _known(words: list[str]) -> bool:
+    command: object = cli
+    for word in words:
+        commands = getattr(command, "commands", None)
+        if commands is None:
+            return True
+        if word not in commands:
+            return False
+        command = commands[word]
+    return True
+
+
+def walk_problems() -> list[Problem]:
+    """Every command the walk calls that the console script does not have."""
+    path = workflow()
+    found = []
+    for words in walk_commands():
+        if not _known(words):
+            found.append(
+                Problem(path, 1, f"the walk calls {' '.join(words)}, which is not a command")
+            )
+    return found
+
+
 def problems() -> list[Problem]:
     """Every check the workflow does not run."""
     path = workflow()
@@ -64,7 +138,7 @@ def problems() -> list[Problem]:
     for version in PYTHONS:
         if f'"{version}"' not in text:
             found.append(Problem(path, 1, f"the workflow does not run the tests on {version}"))
-    return found
+    return found + walk_problems()
 
 
 def main() -> None:

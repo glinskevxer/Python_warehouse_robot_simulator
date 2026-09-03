@@ -170,9 +170,9 @@ jobs:
           spikemaul --book "$book" --on 2026-05-20 order issue PLAINS 13.00-13.60 10 \
             --authority DKEHOE --defect DF-2026-0001
           spikemaul --book "$book" --on 2026-05-20 order bulletin PLAINS
-          spikemaul --book "$book" --on 2026-05-20 order profile PLAINS 12.00-16.00
-          spikemaul --book "$book" --on 2026-05-20 order cost PLAINS 12.00-16.00 \
+          spikemaul --book "$book" --on 2026-05-20 order profile PLAINS 12.00-16.00 \
             --timetable 40
+          spikemaul --book "$book" --on 2026-05-20 order extend SO-2026-0001 --until 2026-06-30
           spikemaul --book "$book" --on 2026-05-20 work raise PLAINS 13.00-13.60 \
             "gauge repair" --quantity 200 --by DKEHOE --due 2026-06-19
           spikemaul --book "$book" work assign WO-2026-0001 SEC2
@@ -187,4 +187,13 @@ jobs:
           spikemaul --book "$book" --on 2026-05-20 rail cycle PLAINS
           spikemaul --book "$book" --on 2026-05-20 report morning PLAINS
           spikemaul --book "$book" --on 2026-05-20 report compliance PLAINS
+          spikemaul --book "$book" --on 2026-05-20 report at PLAINS 13.22
+          spikemaul --book "$book" --on 2026-05-25 report week PLAINS SEC2 --days 3
+          spikemaul --book "$book" --on 2026-05-20 report rail PLAINS
+          spikemaul --book "$book" --on 2026-05-20 report audit PLAINS
+          spikemaul --book "$book" work material PLAINS
+          spikemaul --book "$book" person due --within 400
+          spikemaul --book "$book" find SG-014
+          spikemaul --book "$book" backup --to /tmp/walk-backup.sqlite3
+          spikemaul --book "$book" export /tmp/walk-csv
           spikemaul --book "$book" status
