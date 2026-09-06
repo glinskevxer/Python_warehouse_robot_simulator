@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.support.console import run
+from tests.support.console import a_book, run, with_a_gang, with_a_segment, with_a_subdivision
 
 
 @pytest.fixture
@@ -98,3 +98,104 @@ def test_the_months_add_up_in_the_listing(book: str) -> None:
     run(book, "tonnage", "post", "PLAINS", "2025-02", "1.10")
     listed = run(book, "tonnage", "list", "PLAINS")
     assert "2.30 MGT over 2 months" in listed.output
+
+
+def test_the_milepost_page_answers_the_telephone_question(book: str) -> None:
+    result = run(book, "--on", "2025-05-20", "report", "at", "PLAINS", "13.20")
+    assert result.exit_code == 0
+    assert "Plains MP 13.20 on 2025-05-20" in result.output
+    assert "SG-014" in result.output
+    assert "timetable speed 40 mph" in result.output
+    assert "no open cards here" in result.output
+
+
+def test_the_milepost_page_says_where_no_segment_covers_it(book: str) -> None:
+    result = run(book, "--on", "2025-05-20", "report", "at", "PLAINS", "40.00")
+    assert result.exit_code == 0
+    assert "no segment covers this milepost" in result.output
+    assert "nothing on record sets a speed here" in result.output
+
+
+def test_a_milepost_that_will_not_parse_exits_two(book: str) -> None:
+    result = run(book, "report", "at", "PLAINS", "13.9x")
+    assert result.exit_code == 2
+    assert "is not a milepost" in result.output
+
+
+def test_the_rail_page_counts_what_has_been_measured(book: str) -> None:
+    result = run(book, "--on", "2025-09-01", "report", "rail", "PLAINS")
+    assert result.exit_code == 0
+    assert "0 rails measured" in result.output
+    assert "no rail has been measured" in result.output
+    assert "never" in result.output
+
+
+def test_the_audit_page_names_the_track_no_segment_covers(book: str) -> None:
+    result = run(book, "--on", "2025-05-20", "report", "audit", "PLAINS")
+    assert result.exit_code == 0
+    assert "records audit" in result.output
+    assert "no segment covers it" in result.output
+    assert "sqlite is happy with the file" in result.output
+
+
+def test_the_audit_page_is_quiet_on_a_subdivision_covered_end_to_end(
+    tmp_path: Path,
+) -> None:
+    where = a_book(tmp_path, "covered.sqlite3")
+    with_a_subdivision(where)
+    with_a_segment(where, span="0.00-120.00")
+    result = run(where, "--on", "2025-05-20", "report", "audit", "PLAINS")
+    assert "0 holes in the book" in result.output
+    assert "the book covers the whole subdivision" in result.output
+
+
+def test_the_week_sheet_prints_the_days_and_the_material(book: str) -> None:
+    with_a_gang(book)
+    run(
+        book,
+        "--on",
+        "2025-05-06",
+        "work",
+        "raise",
+        "PLAINS",
+        "13.00-13.60",
+        "tie renewal",
+        "--quantity",
+        "240",
+        "--by",
+        "DKEHOE",
+        "--gang",
+        "SEC2",
+    )
+    result = run(book, "--on", "2025-06-02", "report", "week", "PLAINS", "SEC2", "--days", "3")
+    assert result.exit_code == 0
+    assert "Section 2 week of 2025-06-02" in result.output
+    assert "crossties" in result.output
+    assert "tie plates" in result.output
+
+
+def test_the_week_sheet_says_what_did_not_fit(book: str) -> None:
+    with_a_gang(book)
+    run(
+        book,
+        "--on",
+        "2025-05-06",
+        "work",
+        "raise",
+        "PLAINS",
+        "13.00-13.60",
+        "tie renewal",
+        "--quantity",
+        "2000",
+        "--by",
+        "DKEHOE",
+        "--gang",
+        "SEC2",
+    )
+    result = run(book, "--on", "2025-06-02", "report", "week", "PLAINS", "SEC2", "--days", "2")
+    assert "did not fit" in result.output
+    assert "gang days to clear it" in result.output
+
+
+def test_a_week_for_a_gang_that_is_not_there_exits_three(book: str) -> None:
+    assert run(book, "report", "week", "PLAINS", "SEC9").exit_code == 3
